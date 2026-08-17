@@ -1,0 +1,114 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
+import { getSiteConfig } from '@utils/config';
+
+const cfg = getSiteConfig(Astro.request);
+
+/*
+ * BORRADOR LEGAL. Cubre la estructura que pide la LFPDPPP para un formulario
+ * de contacto, pero los datos del responsable (domicilio fiscal, razón social)
+ * y el plazo de conservación tienen que confirmarlos BioAltaris, y conviene
+ * que lo revise su abogado antes de publicar.
+ */
+---
+
+<BaseLayout title="Aviso de privacidad | BioAltaris">
+   <article class="container-site pb-section pt-10 lg:pt-14">
+      <Breadcrumbs />
+
+      <header class="mx-auto mt-6 max-w-3xl">
+         <h1 class="text-4xl sm:text-5xl">Aviso de privacidad</h1>
+         <p class="mt-4 text-sm text-muted">Última actualización: agosto de 2026</p>
+      </header>
+
+      <div class="prosa mx-auto mt-10 max-w-3xl">
+         <h2>Responsable del tratamiento</h2>
+         <p>
+            {cfg.business.legalName} es responsable del tratamiento de los datos personales que nos proporciones a
+            través de este sitio. Puedes contactarnos en <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a>.
+         </p>
+
+         <h2>Datos que recabamos</h2>
+         <p>A través del formulario de contacto recabamos:</p>
+         <ul>
+            <li>Nombre</li>
+            <li>Correo electrónico</li>
+            <li>Organización (opcional)</li>
+            <li>Teléfono (opcional)</li>
+            <li>El contenido del mensaje que nos envías</li>
+         </ul>
+         <p>
+            No recabamos datos personales sensibles. Si en el cuerpo del mensaje incluyes información confidencial de tu
+            desarrollo, te pedimos limitarla a lo necesario para orientar la conversación inicial.
+         </p>
+
+         <h2>Finalidades</h2>
+         <p>Usamos tus datos para:</p>
+         <ul>
+            <li>Responder tu solicitud y darle seguimiento.</li>
+            <li>Elaborar y enviarte una propuesta de servicios.</li>
+            <li>Mantener el registro de la comunicación asociada a tu proyecto.</li>
+         </ul>
+         <p>No vendemos ni transferimos tus datos a terceros con fines comerciales.</p>
+
+         <h2>Cookies y tecnologías de medición</h2>
+         <p>
+            Este sitio utiliza Google Tag Manager, Google Analytics 4 y Meta Pixel para entender cómo se usa el sitio y
+            medir la efectividad de nuestras campañas. Estas herramientas pueden instalar cookies en tu navegador.
+         </p>
+         <p>
+            Las cookies de medición solo se activan si las aceptas en el aviso que aparece en tu primera visita. Puedes
+            rechazarlas y seguir usando el sitio con normalidad, o cambiar tu decisión borrando los datos del sitio en tu
+            navegador.
+         </p>
+
+         <h2>Conservación</h2>
+         <p>
+            Conservamos los datos del formulario mientras dure la relación de negocio y por el plazo adicional que exija
+            la normativa aplicable. Pasado ese plazo se eliminan.
+         </p>
+
+         <h2>Derechos ARCO</h2>
+         <p>
+            Tienes derecho a acceder, rectificar y cancelar tus datos personales, así como a oponerte a su tratamiento y
+            a revocar el consentimiento que nos hayas otorgado. Para ejercerlos, escríbenos a
+            <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a> indicando tu nombre, el derecho que deseas
+            ejercer y un medio para contactarte. Responderemos en los plazos que marca la Ley Federal de Protección de
+            Datos Personales en Posesión de los Particulares.
+         </p>
+
+         <h2>Cambios a este aviso</h2>
+         <p>
+            Podemos actualizar este aviso. Cualquier cambio se publicará en esta misma página con su fecha de
+            actualización.
+         </p>
+      </div>
+   </article>
+</BaseLayout>
+
+<style is:global>
+   .prosa > * + * {
+      margin-top: 1.25rem;
+   }
+   .prosa h2 {
+      margin-top: 2.5rem;
+      font-size: 1.5rem;
+   }
+   .prosa p,
+   .prosa li {
+      color: rgb(var(--muted));
+      line-height: 1.75;
+   }
+   .prosa ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+   }
+   .prosa li::marker {
+      color: rgb(var(--accent));
+   }
+   .prosa a {
+      color: rgb(var(--accent));
+      text-decoration: underline;
+   }
+</style>

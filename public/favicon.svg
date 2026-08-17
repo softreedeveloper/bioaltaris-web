@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BioAltaris">
+  <rect width="64" height="64" rx="14" fill="#0C1526"/>
+  <!-- Constelación: tres nodos conectados hacia uno mayor, el motivo de marca -->
+  <g stroke="#2F8FF0" stroke-width="1.4" opacity="0.55">
+    <path d="M18 22 L32 34 M18 44 L32 34 M46 18 L32 34"/>
+  </g>
+  <circle cx="18" cy="22" r="3.2" fill="#2FD699"/>
+  <circle cx="18" cy="44" r="3.2" fill="#2F8FF0"/>
+  <circle cx="46" cy="18" r="2.6" fill="#2FD699"/>
+  <circle cx="32" cy="34" r="6" fill="#2FD699"/>
+  <circle cx="32" cy="34" r="10" fill="none" stroke="#2FD699" stroke-width="1.2" opacity="0.4"/>
+</svg>

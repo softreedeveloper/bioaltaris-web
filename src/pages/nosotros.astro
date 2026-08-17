@@ -1,0 +1,85 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
+import CtaSection from '@components/ui/CtaSection.astro';
+import { QUIENES_SOMOS, COMPROMISO, DIFERENCIADORES, EQUIPO } from '@constants/equipo';
+---
+
+<BaseLayout title="Nosotros | BioAltaris">
+   <section class="container-site pb-section pt-10 lg:pt-14">
+      <Breadcrumbs />
+
+      <header class="mt-6 max-w-3xl">
+         <p class="eyebrow">Quiénes somos</p>
+         <h1 class="mt-4 text-4xl sm:text-5xl">Ciencia que resiste una revisión</h1>
+      </header>
+
+      <div class="mt-10 grid gap-6 lg:grid-cols-2 lg:gap-10">
+         {QUIENES_SOMOS.map((parrafo) => <p class="text-base leading-relaxed text-muted">{parrafo}</p>)}
+      </div>
+
+      <blockquote class="panel mt-12 p-7 lg:p-10" data-reveal>
+         <p class="font-serif text-xl leading-relaxed sm:text-2xl">{COMPROMISO}</p>
+         <footer class="mt-4 text-xs uppercase tracking-widest text-accent">Nuestro compromiso</footer>
+      </blockquote>
+   </section>
+
+   <section class="container-site py-section" aria-labelledby="equipo">
+      <header class="max-w-2xl" data-reveal>
+         <p class="eyebrow">Nuestro equipo</p>
+         <h2 id="equipo" class="mt-4 text-3xl sm:text-4xl">Quién va a llevar tu proyecto</h2>
+         <p class="mt-4 text-base leading-relaxed text-muted">
+            Cada proyecto se asigna a asesores que lo acompañan de principio a fin. Estos son los perfiles que lo
+            sostienen.
+         </p>
+      </header>
+
+      <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+         {
+            EQUIPO.map((miembro, i) => (
+               <article class="panel flex h-full flex-col p-7" data-reveal data-reveal-delay={i * 100}>
+                  {/* Las fotos del material de marca están marcadas como
+                      provisionales por el cliente, así que se usa un avatar
+                      con iniciales en lugar de publicar imágenes que se van a
+                      sustituir. */}
+                  <span
+                     class="flex h-16 w-16 items-center justify-center rounded-full border border-accent/30 bg-accent/10 font-serif text-xl text-accent"
+                     aria-hidden="true"
+                  >
+                     {miembro.iniciales}
+                  </span>
+
+                  <p class="mt-5 text-[11px] uppercase tracking-widest text-accent">{miembro.area}</p>
+                  <h3 class="mt-2 text-lg font-semibold leading-snug">{miembro.nombre}</h3>
+
+                  <ul class="mt-3 flex flex-col gap-1">
+                     {miembro.credenciales.map((c) => (
+                        <li class="text-xs leading-relaxed text-muted">{c}</li>
+                     ))}
+                  </ul>
+
+                  <p class="mt-4 border-t border-line pt-4 text-sm leading-relaxed text-muted">{miembro.bio}</p>
+               </article>
+            ))
+         }
+      </div>
+   </section>
+
+   <section class="container-site py-section" aria-labelledby="diferenciadores">
+      <h2 id="diferenciadores" class="text-3xl sm:text-4xl" data-reveal>Por qué elegirnos</h2>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+         {
+            DIFERENCIADORES.map((item, i) => (
+               <article class="rounded-2xl border border-line p-7" data-reveal data-reveal-delay={i * 100}>
+                  <span class="font-serif text-sm text-accent">0{i + 1}</span>
+                  <h3 class="mt-3 text-xl font-semibold">{item.titulo}</h3>
+                  <p class="mt-3 text-sm leading-relaxed text-muted">{item.descripcion}</p>
+               </article>
+            ))
+         }
+      </div>
+   </section>
+
+   <CtaSection location="nosotros_final" />
+</BaseLayout>

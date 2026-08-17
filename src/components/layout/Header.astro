@@ -1,0 +1,171 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { NAV_LINKS, CTA_PRINCIPAL } from '@constants/navegacion';
+
+const path = Astro.url.pathname;
+const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header
+   id="siteHeader"
+   class="sticky top-0 z-50 border-b border-line/70 bg-bg/80 backdrop-blur-md transition-colors"
+>
+   <div class="container-wide flex h-16 items-center justify-between gap-4 lg:h-20">
+      <Logo />
+
+      <nav class="hidden lg:block" aria-label="Navegación principal">
+         <ul class="flex items-center gap-8">
+            {
+               NAV_LINKS.map((link) => (
+                  <li>
+                     <a
+                        href={link.href}
+                        aria-current={esActivo(link.href) ? 'page' : undefined}
+                        class:list={[
+                           'text-sm font-medium transition hover:text-text',
+                           esActivo(link.href) ? 'text-accent' : 'text-muted',
+                        ]}
+                     >
+                        {link.label}
+                     </a>
+                  </li>
+               ))
+            }
+         </ul>
+      </nav>
+
+      <div class="flex items-center gap-1 sm:gap-2">
+         <ThemeToggle />
+
+         <a
+            href={CTA_PRINCIPAL.href}
+            id="cta-header"
+            data-cta="header"
+            class="btn-primary hidden !px-5 !py-2.5 text-[13px] sm:inline-flex"
+         >
+            {CTA_PRINCIPAL.label}
+         </a>
+
+         <button
+            type="button"
+            id="menuToggle"
+            class="flex h-11 w-11 items-center justify-center rounded-full text-text transition hover:bg-text/5 lg:hidden"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="menuMovil"
+         >
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+               <path d="M4 7h16M4 12h16M4 17h16"></path>
+            </svg>
+         </button>
+      </div>
+   </div>
+</header>
+
+{/*
+   El panel se renderiza FUERA de <header> a propósito: el header lleva
+   `backdrop-filter`, y un ancestro con backdrop-filter crea un bloque
+   contenedor que rompe `position: fixed` en sus descendientes — el panel
+   quedaría del alto del header en vez de ocupar la pantalla.
+*/}
+<div
+   id="menuMovil"
+   class="invisible fixed inset-0 z-[60] opacity-0 transition-opacity duration-200 lg:hidden"
+   data-abierto="false"
+>
+   <div class="absolute inset-0 bg-bg/80 backdrop-blur-sm" data-menu-cerrar></div>
+
+   <div
+      id="menuMovilPanel"
+      class="absolute inset-x-0 bottom-0 top-0 flex translate-y-4 flex-col bg-bg2 transition-transform duration-300 ease-out"
+   >
+      <div class="container-site flex h-16 shrink-0 items-center justify-between border-b border-line">
+         <Logo />
+         <div class="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+               type="button"
+               class="flex h-11 w-11 items-center justify-center rounded-full text-text transition hover:bg-text/5"
+               aria-label="Cerrar menú"
+               data-menu-cerrar
+            >
+               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                  <path d="M6 6l12 12M18 6L6 18"></path>
+               </svg>
+            </button>
+         </div>
+      </div>
+
+      <nav class="container-site flex-1 overflow-y-auto py-8" aria-label="Navegación móvil">
+         <ul class="flex flex-col gap-1">
+            {
+               NAV_LINKS.map((link) => (
+                  <li>
+                     <a
+                        href={link.href}
+                        aria-current={esActivo(link.href) ? 'page' : undefined}
+                        class:list={[
+                           'flex min-h-[56px] items-center border-b border-line/60 font-serif text-2xl transition',
+                           esActivo(link.href) ? 'text-accent' : 'text-text hover:text-accent',
+                        ]}
+                     >
+                        {link.label}
+                     </a>
+                  </li>
+               ))
+            }
+         </ul>
+
+         <a href={CTA_PRINCIPAL.href} id="cta-menu-movil" data-cta="menu_movil" class="btn-primary mt-8 w-full">
+            {CTA_PRINCIPAL.label}
+         </a>
+      </nav>
+   </div>
+</div>
+
+<script>
+   const toggle = document.getElementById('menuToggle');
+   const panel = document.getElementById('menuMovil');
+   const interior = document.getElementById('menuMovilPanel');
+
+   if (toggle && panel && interior) {
+      const abrir = () => {
+         panel.dataset.abierto = 'true';
+         panel.classList.remove('invisible', 'opacity-0');
+         interior.classList.remove('translate-y-4');
+         toggle.setAttribute('aria-expanded', 'true');
+         // Congela el scroll de fondo mientras el panel cubre la pantalla
+         document.body.style.overflow = 'hidden';
+         // Primer destino del foco dentro del panel, para teclado y lectores
+         interior.querySelector<HTMLElement>('a, button')?.focus();
+      };
+
+      const cerrar = () => {
+         panel.dataset.abierto = 'false';
+         panel.classList.add('opacity-0');
+         interior.classList.add('translate-y-4');
+         toggle.setAttribute('aria-expanded', 'false');
+         document.body.style.overflow = '';
+         // `invisible` se aplica al terminar la transición para que el fundido
+         // de salida llegue a verse
+         window.setTimeout(() => {
+            if (panel.dataset.abierto === 'false') panel.classList.add('invisible');
+         }, 200);
+         toggle.focus();
+      };
+
+      toggle.addEventListener('click', () => {
+         panel.dataset.abierto === 'true' ? cerrar() : abrir();
+      });
+
+      panel.querySelectorAll('[data-menu-cerrar]').forEach((el) => el.addEventListener('click', cerrar));
+
+      // Al navegar a otra ruta el panel debe irse solo
+      panel.querySelectorAll('a[href]').forEach((el) => el.addEventListener('click', cerrar));
+
+      document.addEventListener('keydown', (e) => {
+         if (e.key === 'Escape' && panel.dataset.abierto === 'true') cerrar();
+      });
+   }
+</script>

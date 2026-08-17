@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import NewsCard from '@components/ui/NewsCard.astro';
+
+const entradas = (await getCollection('conocimiento', ({ data }) => !data.borrador))
+   .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime())
+   .slice(0, 3);
+---
+
+{
+   entradas.length > 0 && (
+      <section class="container-site py-section" aria-labelledby="conocimiento">
+         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+            <div>
+               <p class="eyebrow">Impulsando el conocimiento</p>
+               <h2 id="conocimiento" class="mt-4 text-3xl sm:text-4xl">
+                  Lo que estamos siguiendo
+               </h2>
+            </div>
+            <a href="/conocimiento" class="text-sm font-semibold text-accent transition hover:underline">
+               Ver todo →
+            </a>
+         </header>
+
+         <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {entradas.map((entrada, i) => (
+               <NewsCard entrada={entrada} delay={i * 100} />
+            ))}
+         </div>
+      </section>
+   )
+}

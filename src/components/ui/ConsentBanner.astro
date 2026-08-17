@@ -1,0 +1,69 @@
+---
+/**
+ * Banner de consentimiento.
+ *
+ * Actualiza el Consent Mode v2 que ConsentMode.astro dejó en `denied`. Se
+ * renderiza siempre en el HTML pero arranca oculto: quién debe verlo lo decide
+ * el script leyendo la bandera que ya calculó ConsentMode, sin volver a tocar
+ * localStorage ni provocar un salto de layout al aparecer (va fijo abajo).
+ */
+---
+
+<div
+   id="consentBanner"
+   hidden
+   class="fixed inset-x-0 bottom-0 z-[70] border-t border-line bg-bg2/95 backdrop-blur-md"
+   role="dialog"
+   aria-live="polite"
+   aria-label="Preferencias de cookies"
+>
+   <div class="container-site flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-5">
+      <p class="text-sm leading-relaxed text-muted">
+         Usamos cookies para medir el uso del sitio y mejorar nuestro contenido. Puedes aceptarlas o continuar solo con
+         las necesarias. Más detalles en el <a href="/aviso-de-privacidad" class="text-accent underline">aviso de privacidad</a>.
+      </p>
+
+      <div class="flex shrink-0 gap-3">
+         <button type="button" data-consent="denied" class="btn-ghost !px-5 !py-2.5 text-[13px]">Solo necesarias</button>
+         <button type="button" data-consent="granted" class="btn-primary !px-5 !py-2.5 text-[13px]">Aceptar</button>
+      </div>
+   </div>
+</div>
+
+<script>
+   const banner = document.getElementById('consentBanner');
+
+   if (banner) {
+      // __baConsent lo deja ConsentMode.astro en el <head>. null = sin decisión.
+      const decision = (window as unknown as { __baConsent?: string | null }).__baConsent;
+
+      if (!decision) {
+         banner.hidden = false;
+      }
+
+      banner.querySelectorAll<HTMLButtonElement>('[data-consent]').forEach((btn) => {
+         btn.addEventListener('click', () => {
+            const estado = btn.dataset.consent === 'granted' ? 'granted' : 'denied';
+
+            try {
+               localStorage.setItem('ba-consent', estado);
+            } catch {
+               /* sin persistencia: se volverá a preguntar en la próxima visita */
+            }
+
+            const gtag = (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag;
+            gtag?.('consent', 'update', {
+               ad_storage: estado,
+               ad_user_data: estado,
+               ad_personalization: estado,
+               analytics_storage: estado,
+            });
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event: 'consentimiento', consent_state: estado });
+
+            banner.hidden = true;
+         });
+      });
+   }
+</script>

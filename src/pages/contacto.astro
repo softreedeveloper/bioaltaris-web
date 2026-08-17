@@ -1,0 +1,98 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
+import ContactForm from '@components/ui/ContactForm.astro';
+import { getSiteConfig } from '@utils/config';
+
+const cfg = getSiteConfig(Astro.request);
+
+// Estados que llegan de la ruta /api/lead cuando el envío se hizo sin JS.
+const enviado = Astro.url.searchParams.get('enviado') === '1';
+const error = Astro.url.searchParams.get('error');
+---
+
+<BaseLayout title="Contacto | BioAltaris">
+   <section class="container-site pb-section pt-10 lg:pt-14">
+      <Breadcrumbs />
+
+      <div class="mt-6 grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
+         <div>
+            <p class="eyebrow">Iniciar proyecto</p>
+            <h1 class="mt-4 text-4xl sm:text-5xl">¿Tienes un proyecto en mente?</h1>
+            <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg">
+               Cuéntanos sobre tu reto. Nuestro equipo te contactará a la brevedad.
+            </p>
+
+            <div class="mt-10">
+               {
+                  enviado ? (
+                     <p class="rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm">
+                        Recibido. Nuestro equipo te contactará a la brevedad.
+                     </p>
+                  ) : (
+                     <>
+                        {error && (
+                           <p class="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">{error}</p>
+                        )}
+                        <ContactForm />
+                     </>
+                  )
+               }
+            </div>
+         </div>
+
+         <aside class="lg:pt-16">
+            <div class="panel p-7">
+               <h2 class="text-lg">Datos de contacto</h2>
+
+               <dl class="mt-6 flex flex-col gap-6 text-sm">
+                  <div>
+                     <dt class="text-[11px] uppercase tracking-widest text-muted">Correo</dt>
+                     <dd class="mt-1.5">
+                        <a href={`mailto:${cfg.contact.email}`} class="text-accent transition hover:underline">
+                           {cfg.contact.email}
+                        </a>
+                     </dd>
+                  </div>
+
+                  {
+                     cfg.contact.address && (
+                        <div>
+                           <dt class="text-[11px] uppercase tracking-widest text-muted">Dirección</dt>
+                           <dd class="mt-1.5 leading-relaxed text-muted">
+                              {cfg.contact.address}
+                              <br />
+                              {cfg.contact.city}
+                           </dd>
+                        </div>
+                     )
+                  }
+
+                  <div>
+                     <dt class="text-[11px] uppercase tracking-widest text-muted">Idiomas</dt>
+                     <dd class="mt-1.5 text-muted">Español · Inglés</dd>
+                  </div>
+               </dl>
+            </div>
+
+            <div class="mt-6 rounded-2xl border border-line p-6">
+               <h2 class="text-sm font-semibold">Qué pasa después</h2>
+               <ol class="mt-4 flex flex-col gap-3 text-sm text-muted">
+                  <li class="flex gap-3">
+                     <span class="font-serif text-accent">1</span>
+                     Revisamos tu reto y lo asignamos al asesor con el perfil adecuado.
+                  </li>
+                  <li class="flex gap-3">
+                     <span class="font-serif text-accent">2</span>
+                     Te contactamos para entender el contexto y el punto de partida.
+                  </li>
+                  <li class="flex gap-3">
+                     <span class="font-serif text-accent">3</span>
+                     Proponemos el alcance y la ruta, con los servicios que aplican.
+                  </li>
+               </ol>
+            </div>
+         </aside>
+      </div>
+   </section>
+</BaseLayout>

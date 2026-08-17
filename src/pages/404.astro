@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { NAV_LINKS } from '@constants/navegacion';
+---
+
+<BaseLayout title="Página no encontrada | BioAltaris" noIndex>
+   <section class="container-site flex min-h-[60vh] flex-col items-center justify-center py-section text-center">
+      <p class="font-serif text-6xl text-accent">404</p>
+      <h1 class="mt-6 text-3xl sm:text-4xl">Este nodo no existe</h1>
+      <p class="mt-4 max-w-md text-base leading-relaxed text-muted">
+         La página que buscas se movió o nunca estuvo aquí. Desde estos enlaces puedes retomar el camino.
+      </p>
+
+      <nav class="mt-10 flex flex-wrap justify-center gap-3" aria-label="Enlaces principales">
+         <a href="/" class="btn-primary">Ir al inicio</a>
+         {
+            NAV_LINKS.map((link) => (
+               <a href={link.href} class="btn-ghost">
+                  {link.label}
+               </a>
+            ))
+         }
+      </nav>
+   </section>
+</BaseLayout>

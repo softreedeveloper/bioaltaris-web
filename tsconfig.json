@@ -1,0 +1,23 @@
+{
+   "extends": "astro/tsconfigs/strict",
+   "include": [".astro/types.d.ts", "**/*"],
+   // public/ se sirve tal cual y no pasa por el bundler: metaPixel.js usa las
+   // globales que define el snippet de Meta (fbq, _fbq) y no tiene sentido
+   // tipar contra ellas.
+   "exclude": ["dist", "public", "netlify"],
+   "compilerOptions": {
+      "strict": false,
+      "baseUrl": ".",
+      "paths": {
+         "@/*": ["src/*"],
+         "@components/*": ["src/components/*"],
+         "@layouts/*": ["src/layouts/*"],
+         "@sections/*": ["src/sections/*"],
+         "@styles/*": ["src/styles/*"],
+         "@assets/*": ["src/assets/*"],
+         "@utils/*": ["src/utils/*"],
+         "@constants/*": ["src/constants/*"]
+      },
+      "resolveJsonModule": true
+   }
+}

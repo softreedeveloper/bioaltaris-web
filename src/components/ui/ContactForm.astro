@@ -1,0 +1,236 @@
+---
+/**
+ * Formulario "Iniciar proyecto".
+ *
+ * Funciona sin JavaScript: es un <form> normal que hace POST a /api/lead y
+ * recibe una página de confirmación. Con JS, el envío se intercepta para no
+ * recargar y mostrar el estado en línea, y ahí se disparan los eventos de
+ * medición.
+ */
+---
+
+<form
+   id="formContacto"
+   method="POST"
+   action="/api/lead"
+   class="flex flex-col gap-5"
+   novalidate
+>
+   <!-- Trampa para bots: invisible y fuera del orden de tabulación. Un envío
+        con este campo lleno se descarta en el servidor. -->
+   <div class="absolute left-[-9999px]" aria-hidden="true">
+      <label for="empresa_web">No rellenar</label>
+      <input type="text" id="empresa_web" name="empresa_web" tabindex="-1" autocomplete="off" />
+   </div>
+
+   <div class="grid gap-5 sm:grid-cols-2">
+      <div class="campo">
+         <label for="nombre">Nombre <span aria-hidden="true">*</span></label>
+         <input type="text" id="nombre" name="nombre" required autocomplete="name" maxlength="120" />
+      </div>
+
+      <div class="campo">
+         <label for="organizacion">Organización</label>
+         <input type="text" id="organizacion" name="organizacion" autocomplete="organization" maxlength="120" />
+      </div>
+   </div>
+
+   <div class="grid gap-5 sm:grid-cols-2">
+      <div class="campo">
+         <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
+         <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            autocomplete="email"
+            inputmode="email"
+            maxlength="160"
+            placeholder="tu@correo.com"
+         />
+      </div>
+
+      <div class="campo">
+         <label for="telefono">Teléfono</label>
+         <input type="tel" id="telefono" name="telefono" autocomplete="tel" inputmode="tel" maxlength="40" />
+      </div>
+   </div>
+
+   <div class="campo">
+      <label for="mensaje">Cuéntanos sobre tu reto <span aria-hidden="true">*</span></label>
+      <textarea id="mensaje" name="mensaje" required rows="5" maxlength="2000"></textarea>
+   </div>
+
+   <label class="flex cursor-pointer items-start gap-3 text-sm text-muted">
+      <input type="checkbox" name="privacidad" required class="mt-1 h-4 w-4 shrink-0 accent-[rgb(var(--accent))]" />
+      <span>
+         He leído y acepto el <a href="/aviso-de-privacidad" class="text-accent underline">aviso de privacidad</a>.
+      </span>
+   </label>
+
+   <button type="submit" id="formEnviar" class="btn-primary w-full sm:w-auto sm:self-start">
+      <span data-texto>Enviar</span>
+   </button>
+
+   <p id="formEstado" role="status" aria-live="polite" class="text-sm"></p>
+</form>
+
+<style>
+   .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+   }
+
+   .campo label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: rgb(var(--text));
+   }
+
+   .campo input,
+   .campo textarea {
+      min-height: 48px;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgb(var(--line));
+      border-radius: 0.75rem;
+      background: rgb(var(--bg-2) / 0.6);
+      color: rgb(var(--text));
+      font-size: 0.9375rem;
+      transition:
+         border-color 0.2s ease,
+         box-shadow 0.2s ease;
+   }
+
+   .campo textarea {
+      resize: vertical;
+   }
+
+   .campo input::placeholder,
+   .campo textarea::placeholder {
+      color: rgb(var(--muted) / 0.7);
+   }
+
+   .campo input:focus,
+   .campo textarea:focus {
+      outline: none;
+      border-color: rgb(var(--accent) / 0.6);
+      box-shadow: 0 0 0 3px rgb(var(--accent) / 0.15);
+   }
+
+   .campo input[aria-invalid='true'],
+   .campo textarea[aria-invalid='true'] {
+      border-color: #ef4444;
+   }
+
+   .campo .error {
+      font-size: 0.75rem;
+      color: #ef4444;
+   }
+</style>
+
+<script>
+   const form = document.getElementById('formContacto') as HTMLFormElement | null;
+   const estado = document.getElementById('formEstado');
+   const boton = document.getElementById('formEnviar') as HTMLButtonElement | null;
+
+   if (form && estado && boton) {
+      const textoBoton = boton.querySelector('[data-texto]')!;
+      let empezado = false;
+
+      // form_start: mide cuánta gente abre el formulario y no lo termina.
+      form.addEventListener(
+         'input',
+         () => {
+            if (empezado) return;
+            empezado = true;
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event: 'form_start', form_name: 'iniciar_proyecto' });
+         },
+         { once: false },
+      );
+
+      const marcarError = (campo: HTMLInputElement | HTMLTextAreaElement, mensaje: string) => {
+         campo.setAttribute('aria-invalid', 'true');
+         const contenedor = campo.closest('.campo');
+         if (!contenedor || contenedor.querySelector('.error')) return;
+         const p = document.createElement('p');
+         p.className = 'error';
+         p.textContent = mensaje;
+         contenedor.appendChild(p);
+      };
+
+      const limpiarErrores = () => {
+         form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+         form.querySelectorAll('.error').forEach((el) => el.remove());
+      };
+
+      form.addEventListener('submit', async (e) => {
+         e.preventDefault();
+         limpiarErrores();
+         estado.textContent = '';
+         estado.className = 'text-sm';
+
+         // Validación en el cliente para no gastar un viaje al servidor; el
+         // endpoint valida otra vez, que es la que cuenta.
+         let valido = true;
+         for (const campo of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]')) {
+            if (campo.type === 'checkbox') {
+               if (!(campo as HTMLInputElement).checked) valido = false;
+               continue;
+            }
+            if (!campo.value.trim()) {
+               marcarError(campo, 'Este campo es obligatorio.');
+               valido = false;
+            } else if (campo.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(campo.value.trim())) {
+               marcarError(campo, 'Revisa el formato del correo.');
+               valido = false;
+            }
+         }
+
+         if (!valido) {
+            estado.textContent = 'Revisa los campos marcados antes de enviar.';
+            estado.className = 'text-sm text-red-500';
+            form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+            return;
+         }
+
+         boton.disabled = true;
+         textoBoton.textContent = 'Enviando…';
+
+         try {
+            const res = await fetch('/api/lead', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(Object.fromEntries(new FormData(form))),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || !data.ok) {
+               throw new Error(data.error || 'No se pudo enviar');
+            }
+
+            form.hidden = true;
+            estado.textContent = 'Recibido. Nuestro equipo te contactará a la brevedad.';
+            estado.className = 'rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm text-text';
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event: 'generate_lead', form_name: 'iniciar_proyecto' });
+            window.metaPixel?.track(
+               'Lead',
+               { content_name: 'Formulario iniciar proyecto', content_category: 'lead_generation' },
+               // El correo se manda en claro a nuestro propio servidor, que es
+               // quien lo hashea antes de enviarlo a Meta.
+               { em: [String(new FormData(form).get('email') || '')] },
+            );
+         } catch {
+            estado.textContent =
+               'No pudimos enviar tu mensaje. Inténtalo de nuevo o escríbenos a contacto@bioaltaris.com.';
+            estado.className = 'text-sm text-red-500';
+         } finally {
+            boton.disabled = false;
+            textoBoton.textContent = 'Enviar';
+         }
+      });
+   }
+</script>

@@ -1,0 +1,211 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource/lora/400.css';
+import '@fontsource/lora/600.css';
+import '@styles/global.css';
+
+import { getSiteConfig, generateSEOTags } from '@utils/config';
+import { getPageEntry, getPageSchema } from '@utils/schema';
+
+import ConsentMode from '@components/analytics/ConsentMode.astro';
+import GoogleTagManager from '@components/analytics/GoogleTagManager.astro';
+import GoogleTagManagerBody from '@components/analytics/GoogleTagManagerBody.astro';
+import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
+import MetaPixelScript from '@components/analytics/MetaPixelScript.astro';
+import ConsentBanner from '@components/ui/ConsentBanner.astro';
+
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+
+interface Props {
+   title?: string;
+   description?: string;
+   image?: string;
+   type?: string;
+   noIndex?: boolean;
+   publishedTime?: string;
+   modifiedTime?: string;
+   /** Escotilla para rutas dinámicas, que no están en PAGE_SCHEMA. */
+   schema?: unknown | unknown[];
+}
+
+const { title, description, image, type, noIndex, publishedTime, modifiedTime, schema } = Astro.props;
+
+const siteConfig = getSiteConfig(Astro.request);
+
+// La description de la prop manda; si no hay, la de PAGE_SCHEMA para esta
+// ruta; si tampoco, la del sitio.
+const pageEntry = getPageEntry(Astro.url.pathname);
+
+const seoTags = generateSEOTags(
+   {
+      title,
+      description: description ?? pageEntry?.description ?? undefined,
+      image,
+      type,
+      noIndex,
+      publishedTime,
+      modifiedTime,
+      url: new URL(Astro.url.pathname, siteConfig.canonicalUrl).href,
+   },
+   Astro.request,
+);
+
+const pageSchema = schema ?? getPageSchema(Astro.url.pathname, Astro.request);
+const schemaJson = JSON.stringify(Array.isArray(pageSchema) ? pageSchema : [pageSchema]);
+
+// `?minimal=1` apaga GTM, GA4 y el Pixel de golpe. Sirve para aislar el coste
+// de los scripts de terceros al medir rendimiento sin tocar el código.
+const sinTerceros = Astro.url.searchParams.get('minimal') === '1';
+---
+
+<!doctype html>
+<html lang={siteConfig.site.language} class="no-js dark">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+      <!-- Tema: se aplica antes del primer paint para que no haya flash. El
+           <html> ya se sirve con class="dark", así que solo hay que quitarla
+           si el usuario eligió claro. -->
+      <script is:inline>
+         (function () {
+            try {
+               if (localStorage.getItem('theme') === 'light') {
+                  document.documentElement.classList.remove('dark');
+               }
+            } catch (e) {
+               /* localStorage puede lanzar en modo privado; dark es el default */
+            }
+            document.documentElement.classList.remove('no-js');
+            document.documentElement.classList.add('js');
+         })();
+      </script>
+
+      <title>{seoTags.title}</title>
+      <meta name="description" content={seoTags.description} />
+      <meta name="author" content={seoTags.author} />
+      <meta name="robots" content={seoTags.robots} />
+      <link rel="canonical" href={seoTags.canonical} />
+
+      <!-- Open Graph -->
+      <meta property="og:type" content={seoTags.type} />
+      <meta property="og:url" content={seoTags.canonical} />
+      <meta property="og:title" content={seoTags.title} />
+      <meta property="og:description" content={seoTags.description} />
+      <meta property="og:image" content={seoTags.image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:site_name" content={siteConfig.site.name} />
+      <meta property="og:locale" content={siteConfig.site.locale} />
+      {seoTags.publishedTime && <meta property="article:published_time" content={seoTags.publishedTime} />}
+      {seoTags.modifiedTime && <meta property="article:modified_time" content={seoTags.modifiedTime} />}
+
+      <!-- Twitter -->
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={seoTags.title} />
+      <meta name="twitter:description" content={seoTags.description} />
+      <meta name="twitter:image" content={seoTags.image} />
+
+      <link rel="icon" type="image/svg+xml" href={siteConfig.assets.favicon} />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <meta name="theme-color" content={siteConfig.seo.themeColor} />
+      <meta name="generator" content={Astro.generator} />
+
+      <script is:inline type="application/ld+json" set:html={schemaJson} />
+
+      {
+         !sinTerceros && (
+            <>
+               <ConsentMode />
+               <GoogleTagManager />
+               <GoogleAnalytics />
+            </>
+         )
+      }
+   </head>
+
+   <body class="flex min-h-[100svh] flex-col overflow-x-hidden">
+      {!sinTerceros && <GoogleTagManagerBody />}
+      {!sinTerceros && <MetaPixelScript />}
+
+      <a
+         href="#contenido"
+         class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-accent focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-[#06121F]"
+      >
+         Saltar al contenido
+      </a>
+
+      <Header />
+
+      <main id="contenido" class="flex-1">
+         <slot />
+      </main>
+
+      <Footer />
+
+      {!sinTerceros && <ConsentBanner />}
+
+      <!--
+         Reveal on scroll.
+
+         Va INLINE y sin imports a propósito. El equivalente en Movapp vivía en
+         una isla que a veces no hidrataba en producción y dejaba secciones en
+         opacity:0 para siempre. Un script inline no puede fallar por red ni
+         por el bundler, así que el contenido siempre acaba visible.
+      -->
+      <script is:inline>
+         (function () {
+            function initReveal() {
+               var items = document.querySelectorAll('[data-reveal]:not([data-reveal-observed])');
+               if (!items.length) return;
+
+               for (var i = 0; i < items.length; i++) {
+                  items[i].setAttribute('data-reveal-observed', '');
+               }
+
+               var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+               if (reduce || !('IntersectionObserver' in window)) {
+                  for (var j = 0; j < items.length; j++) items[j].classList.add('is-visible');
+                  return;
+               }
+
+               var io = new IntersectionObserver(
+                  function (entries) {
+                     entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) return;
+                        var el = entry.target;
+                        // Escalonado dentro de un mismo grupo, para que las
+                        // tarjetas no aparezcan todas en el mismo frame.
+                        var delay = Number(el.getAttribute('data-reveal-delay') || 0);
+                        window.setTimeout(function () {
+                           el.classList.add('is-visible');
+                        }, delay);
+                        io.unobserve(el);
+                     });
+                  },
+                  { threshold: 0, rootMargin: '0px 0px -12% 0px' },
+               );
+
+               for (var k = 0; k < items.length; k++) io.observe(items[k]);
+            }
+
+            initReveal();
+            // Red de seguridad: si algo impidió que el observer disparase
+            // (herramientas que capturan la página sin hacer scroll, por
+            // ejemplo), a los 3 s se muestra todo igualmente.
+            window.setTimeout(function () {
+               var ocultos = document.querySelectorAll('[data-reveal]:not(.is-visible)');
+               for (var i = 0; i < ocultos.length; i++) ocultos[i].classList.add('is-visible');
+            }, 3000);
+         })();
+      </script>
+
+      <script>
+         import { initScrollDepth, initOutboundLinks } from '@utils/analytics';
+
+         initScrollDepth();
+         initOutboundLinks();
+      </script>
+   </body>
+</html>

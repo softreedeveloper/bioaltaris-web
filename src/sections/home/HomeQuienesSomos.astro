@@ -1,0 +1,23 @@
+---
+import { QUIENES_SOMOS, COMPROMISO } from '@constants/equipo';
+---
+
+<section class="container-site py-section" aria-labelledby="quienes-somos">
+   <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div data-reveal="left">
+         <p class="eyebrow">Quiénes somos</p>
+         <h2 id="quienes-somos" class="mt-4 text-3xl sm:text-4xl">
+            Rigor científico con <span class="text-accent">enfoque regulatorio</span>
+         </h2>
+      </div>
+
+      <div class="flex flex-col gap-5" data-reveal="right">
+         {QUIENES_SOMOS.map((parrafo) => <p class="text-base leading-relaxed text-muted">{parrafo}</p>)}
+
+         <blockquote class="panel mt-2 p-6">
+            <p class="font-serif text-lg leading-relaxed text-text">{COMPROMISO}</p>
+            <footer class="mt-3 text-xs uppercase tracking-widest text-accent">Nuestro compromiso</footer>
+         </blockquote>
+      </div>
+   </div>
+</section>

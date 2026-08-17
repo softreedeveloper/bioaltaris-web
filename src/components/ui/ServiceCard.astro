@@ -1,0 +1,71 @@
+---
+import Icon from './Icon.astro';
+import { getCategoria, type Servicio } from '@constants/servicios';
+
+interface Props {
+   servicio: Servicio;
+   /** Retardo del reveal, para escalonar las tarjetas de un mismo grupo. */
+   delay?: number;
+}
+
+const { servicio, delay = 0 } = Astro.props;
+const categoria = getCategoria(servicio.categoria);
+const acento = servicio.acento === 'azul' ? 'text-accent2' : 'text-accent';
+---
+
+<article
+   class="group relative flex h-full flex-col rounded-2xl border border-line bg-bg2/50 p-6 transition duration-300 hover:-translate-y-1.5 hover:border-accent/40 hover:shadow-card"
+   data-reveal
+   data-reveal-delay={delay}
+>
+   <div class="flex items-start justify-between gap-4">
+      <span
+         class:list={[
+            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line bg-bg/60',
+            acento,
+         ]}
+      >
+         <Icon name={servicio.icono} />
+      </span>
+
+      <span
+         class:list={[
+            'rounded-full border border-current/25 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest',
+            acento,
+         ]}
+      >
+         {servicio.tag}
+      </span>
+   </div>
+
+   <h3 class="mt-5 text-lg font-semibold">
+      <a href={`/servicios/${servicio.slug}`} class="after:absolute after:inset-0 after:content-['']">
+         {servicio.titulo}
+      </a>
+   </h3>
+
+   <p class="mt-2 text-sm leading-relaxed text-muted">{servicio.resumen}</p>
+
+   <ul class="mt-4 flex flex-col gap-2 border-t border-line pt-4">
+      {
+         servicio.alcance.slice(0, 2).map((item) => (
+            <li class="flex gap-2 text-xs leading-relaxed text-muted">
+               <span class:list={['mt-1.5 h-1 w-1 shrink-0 rounded-full bg-current', acento]} aria-hidden="true" />
+               {item}
+            </li>
+         ))
+      }
+   </ul>
+
+   <span
+      class:list={[
+         'mt-5 inline-flex items-center gap-1.5 text-xs font-semibold transition group-hover:gap-2.5',
+         acento,
+      ]}
+   >
+      {categoria.cta}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+         <path d="M5 12h14M13 6l6 6-6 6"></path>
+      </svg>
+   </span>
+</article>

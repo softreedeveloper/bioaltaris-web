@@ -1,0 +1,34 @@
+---
+/**
+ * Google Tag Manager — parte de <head>.
+ *
+ * El <noscript> con el iframe NO va aquí: es GoogleTagManagerBody.astro y debe
+ * ser el primer hijo de <body>. En Movapp los dos están en el mismo componente
+ * montado en el <head>, lo que produce un <iframe> dentro de <head> — HTML
+ * inválido que el navegador reubica.
+ *
+ * `is:inline` + `define:vars` es el patrón para pasar una variable del servidor
+ * a un script inline. OJO: el contenido de un <script> se emite como texto
+ * crudo y Astro NO evalúa expresiones dentro. Va escrito como JavaScript
+ * normal; envolverlo en {`...`} imprimiría las llaves y los backticks tal cual
+ * y el script no llegaría a ejecutarse.
+ */
+const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
+---
+
+{
+   GTM_ID && (
+      <script is:inline define:vars={{ GTM_ID }}>
+         (function (w, d, s, l, i) {
+            w[l] = w[l] || [];
+            w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+            var f = d.getElementsByTagName(s)[0],
+               j = d.createElement(s),
+               dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+         })(window, document, 'script', 'dataLayer', GTM_ID);
+      </script>
+   )
+}

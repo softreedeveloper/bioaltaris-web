@@ -1,0 +1,21 @@
+---
+/**
+ * Google Tag Manager — fallback sin JavaScript.
+ * Debe ser el primer hijo de <body>. Ver GoogleTagManager.astro.
+ */
+const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
+---
+
+{
+   GTM_ID && (
+      <noscript>
+         <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style="display:none;visibility:hidden"
+            title="Google Tag Manager"
+         />
+      </noscript>
+   )
+}

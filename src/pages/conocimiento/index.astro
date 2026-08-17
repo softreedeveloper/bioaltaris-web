@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
+import NewsCard from '@components/ui/NewsCard.astro';
+import CtaSection from '@components/ui/CtaSection.astro';
+
+const entradas = (await getCollection('conocimiento', ({ data }) => !data.borrador)).sort(
+   (a, b) => b.data.fecha.getTime() - a.data.fecha.getTime(),
+);
+---
+
+<BaseLayout title="Impulsando el conocimiento | BioAltaris">
+   <section class="container-site pb-section pt-10 lg:pt-14">
+      <Breadcrumbs />
+
+      <header class="mt-6 max-w-3xl">
+         <p class="eyebrow">Impulsando el conocimiento</p>
+         <h1 class="mt-4 text-4xl sm:text-5xl">Novedades regulatorias y científicas</h1>
+         <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg">
+            Cambios en las agencias, publicaciones relevantes y avances en desarrollo biofarmacéutico, comentados desde
+            lo que implican para un expediente en curso.
+         </p>
+      </header>
+
+      {
+         entradas.length > 0 ? (
+            <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+               {entradas.map((entrada, i) => (
+                  <NewsCard entrada={entrada} delay={(i % 3) * 80} />
+               ))}
+            </div>
+         ) : (
+            <p class="mt-12 rounded-2xl border border-line p-8 text-center text-muted">
+               Aún no hay publicaciones. Vuelve pronto.
+            </p>
+         )
+      }
+   </section>
+
+   <CtaSection location="conocimiento_final" />
+</BaseLayout>

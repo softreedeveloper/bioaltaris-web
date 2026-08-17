@@ -1,0 +1,18 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import HomeHero from '@sections/home/HomeHero.astro';
+import HomeQuienesSomos from '@sections/home/HomeQuienesSomos.astro';
+import HomeRuta from '@sections/home/HomeRuta.astro';
+import HomeDiferenciadores from '@sections/home/HomeDiferenciadores.astro';
+import HomeConocimiento from '@sections/home/HomeConocimiento.astro';
+import CtaSection from '@components/ui/CtaSection.astro';
+---
+
+<BaseLayout title="BioAltaris | Consultoría biofarmacéutica y regulatoria">
+   <HomeHero />
+   <HomeQuienesSomos />
+   <HomeRuta />
+   <HomeDiferenciadores />
+   <HomeConocimiento />
+   <CtaSection location="home_final" />
+</BaseLayout>

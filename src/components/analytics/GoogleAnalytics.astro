@@ -1,0 +1,40 @@
+---
+/**
+ * Google Analytics 4.
+ *
+ * Usa el shim canónico `function gtag(){dataLayer.push(arguments)}`. La
+ * versión de movapp-web empuja a `gtag.q` en vez de a `dataLayer` y esa cola
+ * nunca se drena, así que los eventos disparados antes de que gtag.js termine
+ * de cargar se pierden.
+ *
+ * `send_page_view: false` + push manual de `page_view`: la vista de página la
+ * dispara GTM, no gtag directamente, para no contarla dos veces cuando ambos
+ * están activos.
+ */
+const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
+---
+
+{
+   GA4_ID && (
+      <script is:inline define:vars={{ GA4_ID }}>
+         window.dataLayer = window.dataLayer || [];
+         function gtag() {
+            window.dataLayer.push(arguments);
+         }
+         window.gtag = window.gtag || gtag;
+
+         var scriptGA = document.createElement('script');
+         scriptGA.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+         scriptGA.async = true;
+         document.head.appendChild(scriptGA);
+
+         gtag('js', new Date());
+         gtag('config', GA4_ID, { send_page_view: false });
+         gtag('event', 'page_view', {
+            page_path: window.location.pathname,
+            page_title: document.title,
+            page_location: window.location.href,
+         });
+      </script>
+   )
+}

@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   TOKENS DE COLOR
+
+   Se declaran como triplete de canales RGB (no hex) para que los
+   modificadores de opacidad de Tailwind sigan funcionando:
+   `bg-panel/50` compila a rgb(var(--panel) / 0.5).
+
+   Dark es el default y vive en :root — el <html> se sirve ya con class="dark"
+   desde el servidor, así que nunca hay un frame en claro. El modo light se
+   deriva bajo html:not(.dark).
+
+   Paleta canónica: diapositiva 10 del PPTX de marca. Los dos mockups HTML
+   traían tres negros distintos (#0C1526 / #0A1220 / #070D17); acá se unifica
+   en el de marca.
+   =========================================================================== */
+:root {
+   --bg: 12 21 38; /* #0C1526 */
+   --bg-2: 15 27 48; /* #0F1B30 */
+   --panel: 15 27 48; /* #0F1B30 — se usa con /50 para el efecto panel */
+   --text: 231 236 243; /* #E7ECF3 */
+   --muted: 159 176 198; /* #9FB0C6 */
+   --accent: 47 214 153; /* #2FD699 */
+   --accent-2: 47 143 240; /* #2F8FF0 */
+   --line: 28 44 70; /* #1C2C46 */
+
+   --halo-accent: rgb(47 214 153 / 0.05);
+   --halo-accent-2: rgb(47 143 240 / 0.05);
+   --scrollbar-thumb: rgb(47 214 153 / 0.35);
+}
+
+html:not(.dark) {
+   --bg: 247 249 252; /* #F7F9FC */
+   --bg-2: 255 255 255; /* #FFFFFF */
+   --panel: 255 255 255; /* #FFFFFF */
+   --text: 12 21 38; /* #0C1526 — el fondo de marca invertido a tinta */
+   --muted: 85 103 127; /* #55677F */
+   /* El verde de marca (#2FD699) sobre fondo claro da 1.6:1 y es ilegible, así
+      que en light se oscurece. #0E7C55 da 4.94:1 contra el fondo y 5.21:1 con
+      texto blanco encima, de modo que sirve igual para texto pequeño (la
+      etiqueta .eyebrow, 11px) y como fondo de botón. */
+   --accent: 14 124 85; /* #0E7C55 */
+   --accent-2: 26 111 196; /* #1A6FC4 — 4.84:1, mismo criterio */
+   --line: 221 229 240; /* #DDE5F0 */
+
+   --halo-accent: rgb(14 124 85 / 0.06);
+   --halo-accent-2: rgb(26 111 196 / 0.06);
+   --scrollbar-thumb: rgb(14 124 85 / 0.4);
+}
+
+/* ===========================================================================
+   BASE
+   =========================================================================== */
+@layer base {
+   * {
+      border-color: rgb(var(--line));
+   }
+
+   html {
+      scroll-behavior: smooth;
+      /* Compensa el header fijo cuando se navega a un ancla */
+      scroll-padding-top: 6rem;
+      -webkit-text-size-adjust: 100%;
+   }
+
+   /* Evita que el rebote de scroll de iOS arrastre los elementos fijos */
+   html,
+   body {
+      overscroll-behavior-y: none;
+   }
+
+   body {
+      margin: 0;
+      background-color: rgb(var(--bg));
+      color: rgb(var(--text));
+      font-family: theme('fontFamily.sans');
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      transition:
+         background-color 0.3s ease,
+         color 0.3s ease;
+   }
+
+   /* Halos de fondo de los mockups. `fixed` para que no se muevan con el
+      scroll y no obliguen a repintar en cada frame. */
+   body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+         radial-gradient(1000px 700px at 78% 50%, var(--halo-accent-2), transparent 62%),
+         radial-gradient(800px 700px at 10% 120%, var(--halo-accent), transparent 55%);
+   }
+
+   h1,
+   h2,
+   h3,
+   h4 {
+      font-family: theme('fontFamily.serif');
+      font-weight: 500;
+      line-height: 1.15;
+      text-wrap: balance;
+   }
+
+   p {
+      text-wrap: pretty;
+   }
+
+   :focus-visible {
+      outline: 2px solid rgb(var(--accent));
+      outline-offset: 3px;
+      border-radius: 2px;
+   }
+
+   ::selection {
+      background-color: rgb(var(--accent) / 0.25);
+   }
+}
+
+/* ===========================================================================
+   COMPONENTES REUTILIZABLES
+   =========================================================================== */
+@layer components {
+   .container-site {
+      @apply mx-auto w-full max-w-content px-5 sm:px-6 lg:px-8;
+   }
+
+   .container-wide {
+      @apply mx-auto w-full max-w-wide px-5 sm:px-6 lg:px-8;
+   }
+
+   /* Etiqueta pequeña sobre un título de sección */
+   .eyebrow {
+      @apply text-[11px] font-semibold uppercase tracking-eyebrow text-accent;
+   }
+
+   /* Superficie translúcida con desenfoque, el tratamiento de tarjeta de los
+      mockups. En light el desenfoque casi no se percibe, así que el fondo
+      sube a opacidad plena para conservar el contraste. */
+   .panel {
+      @apply rounded-2xl border border-line bg-panel/50 backdrop-blur-sm;
+   }
+
+   html:not(.dark) .panel {
+      @apply bg-panel shadow-sm;
+   }
+
+   .btn {
+      @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-200;
+   }
+
+   .btn-primary {
+      @apply btn bg-accent text-[#06121F] hover:shadow-glow focus-visible:shadow-glow;
+   }
+
+   html:not(.dark) .btn-primary {
+      @apply text-white;
+   }
+
+   .btn-ghost {
+      @apply btn border border-accent/40 text-accent hover:border-accent hover:bg-accent/10;
+   }
+
+   /* Texto con gradiente verde→azul (titular del objetivo final) */
+   .gradient-text {
+      background-image: linear-gradient(90deg, rgb(var(--accent)), rgb(var(--accent-2)));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+   }
+}
+
+/* ===========================================================================
+   REVEAL ON SCROLL
+   Sustituye a AOS: el observer vive en BaseLayout.astro y solo añade la clase.
+   =========================================================================== */
+[data-reveal] {
+   opacity: 0;
+   transform: translate3d(0, 28px, 0);
+   transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+   will-change: opacity, transform;
+}
+
+[data-reveal='left'] {
+   transform: translate3d(-32px, 0, 0);
+}
+
+[data-reveal='right'] {
+   transform: translate3d(32px, 0, 0);
+}
+
+[data-reveal].is-visible {
+   opacity: 1;
+   transform: none;
+}
+
+/* Sin JS nada debe quedarse invisible para siempre */
+.no-js [data-reveal] {
+   opacity: 1;
+   transform: none;
+}
+
+/* ===========================================================================
+   SCROLLBAR
+   =========================================================================== */
+* {
+   scrollbar-width: thin;
+   scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+   width: 10px;
+   height: 10px;
+}
+
+::-webkit-scrollbar-track {
+   background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+   background-color: var(--scrollbar-thumb);
+   border-radius: 99px;
+   border: 3px solid transparent;
+   background-clip: content-box;
+}
+
+/* ===========================================================================
+   ACCESIBILIDAD DE MOVIMIENTO
+   El canvas de constelación y el reveal se apagan por completo; el resto de
+   animaciones se reducen a un frame.
+   =========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+   html {
+      scroll-behavior: auto;
+   }
+
+   *,
+   *::before,
+   *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+   }
+
+   [data-reveal] {
+      opacity: 1;
+      transform: none;
+   }
+}

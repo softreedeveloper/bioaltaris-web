@@ -1,0 +1,218 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
+import ServiceCard from '@components/ui/ServiceCard.astro';
+import CtaSection from '@components/ui/CtaSection.astro';
+import { CATEGORIAS, SERVICIOS } from '@constants/servicios';
+---
+
+<BaseLayout title="Servicios | BioAltaris">
+   <section class="container-wide pb-6 pt-10 lg:pt-14">
+      <Breadcrumbs />
+
+      <header class="mt-6 max-w-3xl">
+         <p class="eyebrow">Ruta estratégica</p>
+         <h1 class="mt-4 text-4xl sm:text-5xl">Catálogo de servicios</h1>
+         <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg">
+            {SERVICIOS.length} servicios organizados en {CATEGORIAS.length} etapas. Puedes contratarlos por separado o
+            recorrerlos en secuencia hasta el expediente regulatorio.
+         </p>
+      </header>
+   </section>
+
+   <div class="container-wide grid gap-8 pb-section lg:grid-cols-[320px_1fr] lg:gap-14">
+      <!-- Filtros. En móvil son chips que se deslizan; desde lg, una barra
+           lateral pegajosa. -->
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+         <h2 class="eyebrow hidden lg:block">Filtrar por etapa</h2>
+
+         <div class="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:overflow-visible lg:px-0">
+            <div class="flex gap-3 pb-2 lg:mt-5 lg:flex-col lg:gap-2 lg:pb-0" role="tablist" aria-label="Etapas">
+               <button
+                  type="button"
+                  role="tab"
+                  data-filtro="todos"
+                  aria-selected="true"
+                  class="filtro shrink-0 lg:w-full"
+               >
+                  <span class="filtro-num">00</span>
+                  <span class="filtro-texto">
+                     <span class="filtro-nombre">Todos los servicios</span>
+                     <span class="filtro-lema">Las tres etapas</span>
+                  </span>
+               </button>
+
+               {
+                  CATEGORIAS.map((cat) => (
+                     <button
+                        type="button"
+                        role="tab"
+                        data-filtro={cat.id}
+                        aria-selected="false"
+                        class="filtro shrink-0 lg:w-full"
+                     >
+                        <span class="filtro-num">{cat.numero}</span>
+                        <span class="filtro-texto">
+                           <span class="filtro-nombre">{cat.nombre}</span>
+                           <span class="filtro-lema">{cat.lema}</span>
+                        </span>
+                     </button>
+                  ))
+               }
+            </div>
+         </div>
+
+         <p class="mt-6 hidden text-sm leading-relaxed text-muted lg:block" id="filtroDescripcion">
+            Los tres bloques cubren el recorrido completo: evidencia biológica, caracterización del producto y estrategia
+            regulatoria.
+         </p>
+      </aside>
+
+      <div>
+         <p class="sr-only" role="status" aria-live="polite" id="filtroEstado">
+            Mostrando los {SERVICIOS.length} servicios.
+         </p>
+
+         <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" id="gridServicios">
+            {
+               SERVICIOS.map((servicio, i) => (
+                  <div data-categoria={servicio.categoria}>
+                     <ServiceCard servicio={servicio} delay={(i % 3) * 80} />
+                  </div>
+               ))
+            }
+         </div>
+      </div>
+   </div>
+
+   <CtaSection location="servicios_final" />
+</BaseLayout>
+
+<style>
+   .filtro {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      min-height: 44px;
+      padding: 0.875rem 1rem;
+      border: 1px solid rgb(var(--line));
+      border-radius: 0.75rem;
+      text-align: left;
+      transition:
+         border-color 0.2s ease,
+         background-color 0.2s ease,
+         transform 0.2s ease;
+   }
+
+   .filtro:hover {
+      border-color: rgb(var(--accent) / 0.4);
+   }
+
+   @media (min-width: 1024px) {
+      .filtro:hover {
+         transform: translateX(4px);
+      }
+   }
+
+   .filtro[aria-selected='true'] {
+      border-color: rgb(var(--accent) / 0.5);
+      background-image: linear-gradient(100deg, rgb(var(--accent) / 0.1), rgb(var(--bg-2) / 0.5));
+   }
+
+   .filtro-num {
+      font-family: theme('fontFamily.serif');
+      font-size: 0.875rem;
+      color: rgb(var(--muted));
+   }
+
+   .filtro[aria-selected='true'] .filtro-num {
+      color: rgb(var(--accent));
+   }
+
+   .filtro-texto {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+   }
+
+   .filtro-nombre {
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+   }
+
+   .filtro-lema {
+      font-size: 0.6875rem;
+      color: rgb(var(--muted));
+      white-space: nowrap;
+   }
+
+   @media (min-width: 1024px) {
+      .filtro-nombre,
+      .filtro-lema {
+         white-space: normal;
+      }
+   }
+</style>
+
+<script>
+   import { pushEvent } from '@utils/analytics';
+   import { CATEGORIAS } from '@constants/servicios';
+
+   const botones = document.querySelectorAll<HTMLButtonElement>('[data-filtro]');
+   const tarjetas = document.querySelectorAll<HTMLElement>('#gridServicios > [data-categoria]');
+   const estado = document.getElementById('filtroEstado');
+   const descripcion = document.getElementById('filtroDescripcion');
+
+   const descripciones: Record<string, string> = {
+      todos: descripcion?.textContent?.trim() ?? '',
+      ...Object.fromEntries(CATEGORIAS.map((c) => [c.id, c.descripcion])),
+   };
+
+   function aplicar(filtro: string) {
+      botones.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.filtro === filtro)));
+
+      let visibles = 0;
+      tarjetas.forEach((tarjeta) => {
+         const coincide = filtro === 'todos' || tarjeta.dataset.categoria === filtro;
+         tarjeta.hidden = !coincide;
+         if (!coincide) return;
+
+         visibles++;
+         // Reinicia la animación de entrada: sin forzar un reflow el navegador
+         // agrupa el quitar y poner la clase y no se ve nada.
+         const card = tarjeta.firstElementChild as HTMLElement | null;
+         if (card) {
+            card.classList.remove('animate-fadeUp');
+            void card.offsetHeight;
+            card.classList.add('animate-fadeUp');
+         }
+      });
+
+      if (estado) {
+         estado.textContent =
+            visibles === 1 ? 'Mostrando 1 servicio.' : `Mostrando ${visibles} servicios.`;
+      }
+      if (descripcion && descripciones[filtro]) {
+         descripcion.textContent = descripciones[filtro];
+      }
+
+      pushEvent('filter_services', { filter_category: filtro, results_count: visibles });
+   }
+
+   botones.forEach((boton) => {
+      boton.addEventListener('click', () => {
+         const filtro = boton.dataset.filtro;
+         if (!filtro) return;
+         aplicar(filtro);
+         // Refleja el filtro en la URL para poder compartir/volver a él
+         const url = new URL(window.location.href);
+         filtro === 'todos' ? url.searchParams.delete('etapa') : url.searchParams.set('etapa', filtro);
+         history.replaceState(null, '', url);
+      });
+   });
+
+   // Entrada directa desde /servicios?etapa=… o desde los enlaces del footer
+   const inicial = new URL(window.location.href).searchParams.get('etapa') ?? window.location.hash.slice(1);
+   if (inicial && descripciones[inicial]) aplicar(inicial);
+</script>

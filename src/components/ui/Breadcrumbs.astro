@@ -1,0 +1,59 @@
+---
+/**
+ * Migas de pan visibles.
+ *
+ * Para rutas estáticas el label se lee de PAGE_SCHEMA, el mismo mapa que
+ * genera el BreadcrumbList del JSON-LD: así lo que ve el usuario y lo que ve
+ * Google no pueden divergir. Las rutas dinámicas pasan sus items por prop.
+ */
+import { getPageEntry } from '@utils/schema';
+
+interface Item {
+   name: string;
+   href?: string;
+}
+
+interface Props {
+   items?: Item[];
+   class?: string;
+}
+
+const { items: itemsProp, class: className = '' } = Astro.props;
+
+const items: Item[] =
+   itemsProp ??
+   (() => {
+      const entry = getPageEntry(Astro.url.pathname);
+      return entry?.breadcrumb ? [{ name: entry.breadcrumb }] : [];
+   })();
+---
+
+{
+   items.length > 0 && (
+      <nav aria-label="Ruta de navegación" class:list={['text-xs text-muted', className]}>
+         <ol class="flex flex-wrap items-center gap-1.5">
+            <li>
+               <a href="/" class="transition hover:text-accent">
+                  Inicio
+               </a>
+            </li>
+            {items.map((item, i) => (
+               <li class="flex items-center gap-1.5">
+                  <span aria-hidden="true" class="text-line">
+                     /
+                  </span>
+                  {item.href && i < items.length - 1 ? (
+                     <a href={item.href} class="transition hover:text-accent">
+                        {item.name}
+                     </a>
+                  ) : (
+                     <span class="text-text/70" aria-current="page">
+                        {item.name}
+                     </span>
+                  )}
+               </li>
+            ))}
+         </ol>
+      </nav>
+   )
+}

@@ -1,0 +1,51 @@
+---
+/**
+ * Bloque de cierre con CTA. Se reutiliza al final de home, servicios y
+ * nosotros; `location` distingue en la medición desde qué página se convirtió.
+ */
+import { getSiteConfig } from '@utils/config';
+
+interface Props {
+   location: string;
+   titulo?: string;
+   descripcion?: string;
+}
+
+const {
+   location,
+   // El original decía "TIENES UN PROYECTO EN MENTE?" y "Nuestro te contactará
+   // a la brevedad" — se corrigen la apertura de interrogación y el sustantivo
+   // que faltaba.
+   titulo = '¿Tienes un proyecto en mente?',
+   descripcion = 'Cuéntanos sobre tu reto. Nuestro equipo te contactará a la brevedad.',
+} = Astro.props;
+
+const cfg = getSiteConfig(Astro.request);
+const id = `cta-${location.replace(/_/g, '-')}`;
+---
+
+<section class="container-site py-section">
+   <div class="panel relative overflow-hidden px-6 py-14 text-center sm:px-10 lg:py-20" data-reveal>
+      <div
+         class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+         aria-hidden="true"
+      >
+      </div>
+
+      <h2 class="mx-auto max-w-2xl text-3xl sm:text-4xl">{titulo}</h2>
+      <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">{descripcion}</p>
+
+      <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+         <a href="/contacto" id={id} data-cta={location} class="btn-primary">Iniciar proyecto</a>
+         <a href={`mailto:${cfg.contact.email}`} class="btn-ghost">{cfg.contact.email}</a>
+      </div>
+   </div>
+</section>
+
+<script is:inline define:vars={{ id, location }}>
+   document.getElementById(id)?.addEventListener('click', () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'cta_iniciar_proyecto', cta_location: location, cta_label: 'Iniciar proyecto' });
+      window.metaPixel?.track('Lead', { content_name: `CTA ${location}`, content_category: 'lead_generation' });
+   });
+</script>

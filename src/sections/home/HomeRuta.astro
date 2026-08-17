@@ -1,0 +1,325 @@
+---
+/**
+ * La "constelación": el recorrido de tres fases hasta el expediente
+ * regulatorio. En móvil es una línea a la izquierda con las tarjetas a la
+ * derecha; a partir de `lg` la línea se centra y las tarjetas alternan lado.
+ */
+import Icon from '@components/ui/Icon.astro';
+import { FASES, OBJETIVO_FINAL } from '@constants/fases';
+import { getServicio } from '@constants/servicios';
+
+const fasesConServicios = FASES.map((fase) => ({
+   ...fase,
+   items: fase.servicios.map((slug) => {
+      const servicio = getServicio(slug);
+      // Si un slug de fases.ts deja de existir en servicios.ts, el build falla
+      // aquí en vez de renderizar un hueco silencioso en producción.
+      if (!servicio) throw new Error(`fases.ts referencia un servicio inexistente: ${slug}`);
+      return servicio;
+   }),
+}));
+---
+
+<section class="ruta relative py-section" aria-labelledby="ruta-titulo">
+   <div class="container-site">
+      <header class="mx-auto max-w-2xl text-center" data-reveal>
+         <p class="eyebrow">El recorrido</p>
+         <h2 id="ruta-titulo" class="mt-4 text-3xl sm:text-4xl">Del laboratorio al expediente</h2>
+         <p class="mt-4 text-base leading-relaxed text-muted">
+            Tres etapas encadenadas. Cada una produce la evidencia que la siguiente necesita para sostenerse.
+         </p>
+      </header>
+
+      <div class="ruta-track relative mt-16">
+         <div class="ruta-linea" aria-hidden="true"></div>
+         <div class="ruta-progreso" id="rutaProgreso" aria-hidden="true"></div>
+
+         {
+            fasesConServicios.map((fase) => (
+               <div class="ruta-fase">
+                  <div class="ruta-fase-cabecera" data-reveal>
+                     <span
+                        class:list={['ruta-orbe', fase.acento === 'azul' ? 'text-accent2' : 'text-accent']}
+                        aria-hidden="true"
+                     >
+                        {fase.numero}
+                     </span>
+                     <h3 class="mt-4 text-xl uppercase tracking-[0.15em] sm:text-2xl">{fase.titulo}</h3>
+                     <p
+                        class:list={[
+                           'mt-2 text-xs uppercase tracking-widest',
+                           fase.acento === 'azul' ? 'text-accent2' : 'text-accent',
+                        ]}
+                     >
+                        {fase.lema}
+                     </p>
+                  </div>
+
+                  {fase.items.map((servicio, i) => (
+                     <div class="ruta-fila" data-lado={i % 2 === 0 ? 'izq' : 'der'}>
+                        <span
+                           class:list={[
+                              'ruta-nodo',
+                              servicio.acento === 'azul' ? 'text-accent2' : 'text-accent',
+                           ]}
+                           aria-hidden="true"
+                        />
+
+                        <article class="ruta-tarjeta panel p-6" data-reveal>
+                           <div
+                              class:list={[
+                                 'ruta-tarjeta-meta flex items-center gap-3',
+                                 servicio.acento === 'azul' ? 'text-accent2' : 'text-accent',
+                              ]}
+                           >
+                              <Icon name={servicio.icono} class="h-5 w-5" />
+                              <span class="text-[10px] font-semibold uppercase tracking-widest">{servicio.tag}</span>
+                           </div>
+
+                           <h4 class="mt-3 text-lg font-semibold">
+                              <a href={`/servicios/${servicio.slug}`} class="transition hover:text-accent">
+                                 {servicio.titulo}
+                              </a>
+                           </h4>
+
+                           <p class="mt-2 text-sm leading-relaxed text-muted">{servicio.detalle}</p>
+
+                           <ul class="mt-4 flex flex-col gap-2 border-t border-line pt-4">
+                              {servicio.alcance.slice(0, 2).map((item) => (
+                                 <li class="text-xs leading-relaxed text-muted">{item}</li>
+                              ))}
+                           </ul>
+                        </article>
+                     </div>
+                  ))}
+               </div>
+            ))
+         }
+
+         <div class="ruta-objetivo" id="rutaObjetivo" data-reveal>
+            <span class="ruta-objetivo-icono" aria-hidden="true">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8">
+                  <path d="M12 3c2.5 2.2 4 5.4 4 8.7 0 1.6-.4 3.2-1 4.6H9c-.6-1.4-1-3-1-4.6C8 8.4 9.5 5.2 12 3z"></path>
+                  <path d="M9 16.3 7 19l2.5-.5M15 16.3 17 19l-2.5-.5M12 9.5v.01"></path>
+               </svg>
+            </span>
+
+            <h3 class="mt-6 text-2xl sm:text-3xl">
+               <span class="gradient-text">{OBJETIVO_FINAL.titulo}</span>
+            </h3>
+            <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
+               {OBJETIVO_FINAL.descripcion}
+            </p>
+         </div>
+      </div>
+   </div>
+</section>
+
+<style>
+   /* --- Rail: a la izquierda en móvil, centrado desde lg --- */
+   .ruta-track {
+      --rail: 1.25rem;
+   }
+
+   .ruta-linea,
+   .ruta-progreso {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--rail);
+      width: 1px;
+   }
+
+   .ruta-linea {
+      background: rgb(var(--line));
+   }
+
+   .ruta-progreso {
+      bottom: auto;
+      height: 0;
+      background: linear-gradient(180deg, rgb(var(--accent)), rgb(var(--accent-2)));
+      box-shadow: 0 0 8px rgb(var(--accent) / 0.4);
+      transition: height 0.4s ease-out;
+   }
+
+   .ruta-fase + .ruta-fase {
+      margin-top: 4rem;
+   }
+
+   .ruta-fase-cabecera {
+      padding-left: calc(var(--rail) + 2.5rem);
+   }
+
+   .ruta-orbe {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      background: rgb(var(--bg));
+      font-family: theme('fontFamily.serif');
+      font-size: 1.125rem;
+      box-shadow: 0 0 20px rgb(var(--accent) / 0.25);
+      /* Centra el orbe sobre el rail */
+      margin-left: calc(-1 * (var(--rail) + 2.5rem) + var(--rail) - 1.5rem);
+   }
+
+   .ruta-fila {
+      position: relative;
+      margin-top: 2rem;
+      padding-left: calc(var(--rail) + 2.5rem);
+   }
+
+   .ruta-nodo {
+      position: absolute;
+      top: 2rem;
+      left: var(--rail);
+      width: 0.75rem;
+      height: 0.75rem;
+      margin-left: -0.375rem;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+   }
+
+   /* Conector del nodo a la tarjeta */
+   .ruta-nodo::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      width: 2rem;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.4;
+   }
+
+   .ruta-objetivo {
+      margin-top: 5rem;
+      padding-left: calc(var(--rail) + 2.5rem);
+   }
+
+   .ruta-objetivo-icono {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 5rem;
+      height: 5rem;
+      border-radius: 999px;
+      color: rgb(var(--accent));
+      background: linear-gradient(135deg, rgb(var(--accent) / 0.2), rgb(var(--accent-2) / 0.2));
+      box-shadow: 0 0 40px rgb(var(--accent) / 0.3);
+      margin-left: calc(-1 * (var(--rail) + 2.5rem) + var(--rail) - 2.5rem);
+   }
+
+   .ruta-objetivo-icono::before {
+      content: '';
+      position: absolute;
+      inset: -0.625rem;
+      border-radius: 999px;
+      border: 1px dashed rgb(var(--accent-2) / 0.5);
+      animation: theme('animation.spinSlow');
+   }
+
+   @media (min-width: 1024px) {
+      .ruta-track {
+         --rail: 50%;
+      }
+
+      .ruta-fase-cabecera {
+         padding-left: 0;
+         text-align: center;
+      }
+
+      .ruta-orbe {
+         margin-left: 0;
+      }
+
+      .ruta-fila {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         column-gap: 5rem;
+         padding-left: 0;
+         margin-top: 2.5rem;
+      }
+
+      .ruta-fila[data-lado='izq'] .ruta-tarjeta {
+         grid-column: 1;
+         text-align: right;
+      }
+
+      .ruta-fila[data-lado='der'] .ruta-tarjeta {
+         grid-column: 2;
+      }
+
+      .ruta-fila[data-lado='izq'] .ruta-nodo::after {
+         left: auto;
+         right: 100%;
+      }
+
+      /* En la columna izquierda todo el contenido se alinea a la derecha,
+         incluida la fila de icono + etiqueta, que si no se quedaría pegada al
+         borde contrario al del resto del texto. */
+      .ruta-fila[data-lado='izq'] .ruta-tarjeta ul {
+         text-align: right;
+      }
+
+      .ruta-fila[data-lado='izq'] .ruta-tarjeta-meta {
+         flex-direction: row-reverse;
+      }
+
+      .ruta-objetivo {
+         padding-left: 0;
+         text-align: center;
+      }
+
+      .ruta-objetivo-icono {
+         margin-left: 0;
+      }
+   }
+</style>
+
+<script>
+   /**
+    * La línea de progreso se rellena conforme el usuario avanza por el
+    * recorrido. Se calcula contra la posición del objetivo final, no contra el
+    * alto del documento, para que llegue al 100% justo al alcanzarlo.
+    */
+   const track = document.querySelector<HTMLElement>('.ruta-track');
+   const progreso = document.getElementById('rutaProgreso');
+   const objetivo = document.getElementById('rutaObjetivo');
+
+   if (track && progreso && objetivo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let pendiente = false;
+
+      const actualizar = () => {
+         pendiente = false;
+
+         const rectTrack = track.getBoundingClientRect();
+         const rectObjetivo = objetivo.getBoundingClientRect();
+
+         const inicio = rectTrack.top;
+         const fin = rectObjetivo.top + rectObjetivo.height / 2 - rectTrack.top;
+         if (fin <= 0) return;
+
+         // Punto de referencia: dos tercios de la altura de la ventana
+         const recorrido = window.innerHeight / 1.5 - inicio;
+         const porcentaje = Math.min(Math.max((recorrido / fin) * 100, 0), 100);
+
+         progreso.style.height = `${porcentaje}%`;
+      };
+
+      const onScroll = () => {
+         if (pendiente) return;
+         pendiente = true;
+         requestAnimationFrame(actualizar);
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      actualizar();
+   }
+</script>

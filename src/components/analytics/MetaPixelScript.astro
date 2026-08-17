@@ -1,0 +1,44 @@
+---
+/**
+ * Bootstrap del Meta Pixel.
+ *
+ * Movapp inicializa dentro de un DOMContentLoaded y asume que el script
+ * diferido ya corrió; si no lo hizo, window.metaPixelUtils es undefined y no
+ * hay reintento — el pixel queda muerto en silencio. Aquí se escucha el evento
+ * `metapixel:ready` que emite metaPixel.js y además se comprueba si ya estaba
+ * listo, así que ninguno de los dos órdenes de carga falla.
+ */
+const pixelId = import.meta.env.PUBLIC_META_PIXEL_ID;
+---
+
+{
+   pixelId && (
+      <>
+         <script src="/js/metaPixel.js" defer is:inline />
+         <script is:inline define:vars={{ pixelId }}>
+            (function () {
+               function arrancar() {
+                  var utils = window.metaPixelUtils;
+                  if (!utils) return false;
+
+                  utils.initMetaPixel(pixelId);
+
+                  window.metaPixel = {
+                     track: function (eventName, customData, userData) {
+                        return utils.trackEvent(eventName, customData, userData);
+                     },
+                     trackPageView: function (customData) {
+                        return utils.trackPageView(customData);
+                     },
+                  };
+                  return true;
+               }
+
+               if (!arrancar()) {
+                  document.addEventListener('metapixel:ready', arrancar, { once: true });
+               }
+            })();
+         </script>
+      </>
+   )
+}
