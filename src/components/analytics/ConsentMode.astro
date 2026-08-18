@@ -1,12 +1,17 @@
 ---
 /**
- * Consent Mode v2. TIENE que ir en el <head> ANTES de GTM y GA4: el estado
+ * Consent Mode v2. TIENE que ir en el head ANTES de GTM y GA4: el estado
  * `default` debe estar en el dataLayer cuando los tags se evalúan por primera
  * vez, o el primer page_view se envía sin restricciones.
  *
- * Se arranca en `denied` y se actualiza a `granted` si el usuario ya aceptó en
- * una visita previa (bandera en localStorage, leída aquí de forma síncrona).
- * El banner que dispara la aceptación es components/ui/ConsentBanner.astro.
+ * Se concede por defecto. El sitio ya no muestra banner de cookies, así que
+ * no hay ninguna interacción que pueda pasar el estado de `denied` a
+ * `granted`: arrancar denegado dejaría a GA4 y al Pixel sin medir nunca.
+ *
+ * Se conserva la capa de Consent Mode (en vez de quitarla) porque es lo que
+ * GTM y GA4 esperan encontrar; si mañana se vuelve a exigir el aviso previo,
+ * basta con cambiar `estado` a 'denied' y volver a montar un banner que llame
+ * a `gtag('consent', 'update', ...)`.
  */
 ---
 
@@ -18,15 +23,7 @@
       }
       window.gtag = window.gtag || gtag;
 
-      var almacenado = null;
-      try {
-         almacenado = localStorage.getItem('ba-consent');
-      } catch (e) {
-         /* Safari en modo privado puede lanzar al leer localStorage */
-      }
-
-      var concedido = almacenado === 'granted';
-      var estado = concedido ? 'granted' : 'denied';
+      var estado = 'granted';
 
       gtag('consent', 'default', {
          ad_storage: estado,
@@ -35,11 +32,6 @@
          analytics_storage: estado,
          functionality_storage: 'granted',
          security_storage: 'granted',
-         wait_for_update: 500,
       });
-
-      // Señal para que el banner sepa si debe mostrarse, sin volver a leer
-      // localStorage desde otro script.
-      window.__baConsent = almacenado;
    })();
 </script>

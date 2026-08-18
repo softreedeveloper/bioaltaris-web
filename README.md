@@ -44,7 +44,7 @@ src/
 ├── components/
 │   ├── analytics/      GTM, GA4, Meta Pixel, Consent Mode
 │   ├── layout/         Header, Footer, Logo, ThemeToggle
-│   ├── decorative/     Canvas de constelación
+│   ├── decorative/     Campo de estrellas del hero
 │   └── ui/             Tarjetas, formulario, migas, CTA
 ├── layouts/            BaseLayout: head SEO, JSON-LD, tracking, reveal
 ├── pages/              Rutas + endpoints (api/lead, sitemap, robots, env-check)
@@ -85,7 +85,8 @@ producción.
 ## Medición
 
 ```
-<head>  ConsentMode → GTM → GA4        (el consentimiento debe ir primero)
+<head>  ConsentMode → GTM → GA4        (Consent Mode v2 concedido por defecto,
+                                       sin banner; debe ir primero igualmente)
 <body>  noscript de GTM → Meta Pixel
 ```
 
@@ -101,7 +102,6 @@ Eventos que empuja el sitio al `dataLayer`:
 | `generate_lead` | Contacto (envío correcto) | `form_name` |
 | `scroll_depth` | Todas | `percent_scrolled` (25/50/75/100) |
 | `click_externo` | Todas | `link_url`, `link_domain`, `link_text` |
-| `consentimiento` | Banner | `consent_state` |
 | `cambio_tema` | Toggle | `theme` |
 
 En Meta: `Lead` en los CTA y al enviar el formulario, `ViewContent` en el detalle
@@ -157,8 +157,9 @@ producción y staging, y en `netlify/functions/meta-conversion.js` la lista
 - URLs de LinkedIn e Instagram (`social` en `config.ts`; los enlaces vacíos no se
   renderizan).
 - Dominio definitivo.
-- Fotos del equipo: las del material de marca están marcadas por el propio cliente
-  como provisionales, así que las fichas usan un avatar con iniciales. Añadir
-  `foto` en `constants/equipo.ts` cuando lleguen.
+- Fotos del equipo: las publicadas salen de la diapositiva 5 del PPTX, que el propio
+  cliente titula "Nuestro equipo (Las fotos serán otras)". Cuando lleguen las
+  definitivas, sustituir los archivos de `src/assets/equipo/` conservando el nombre
+  y el recorte cuadrado.
 - Revisión legal del aviso de privacidad.
 - Flujo de n8n que reciba el webhook de leads.

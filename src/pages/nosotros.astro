@@ -2,7 +2,8 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
-import { QUIENES_SOMOS, COMPROMISO, DIFERENCIADORES, EQUIPO } from '@constants/equipo';
+import TeamCarousel from '@components/ui/TeamCarousel.astro';
+import { QUIENES_SOMOS, COMPROMISO, DIFERENCIADORES } from '@constants/equipo';
 ---
 
 <BaseLayout title="Nosotros | BioAltaris">
@@ -24,8 +25,8 @@ import { QUIENES_SOMOS, COMPROMISO, DIFERENCIADORES, EQUIPO } from '@constants/e
       </blockquote>
    </section>
 
-   <section class="container-site py-section" aria-labelledby="equipo">
-      <header class="max-w-2xl" data-reveal>
+   <section class="py-section" aria-labelledby="equipo">
+      <header class="container-site mx-auto max-w-xl text-center" data-reveal>
          <p class="eyebrow">Nuestro equipo</p>
          <h2 id="equipo" class="mt-4 text-3xl sm:text-4xl">Quién va a llevar tu proyecto</h2>
          <p class="mt-4 text-base leading-relaxed text-muted">
@@ -34,35 +35,7 @@ import { QUIENES_SOMOS, COMPROMISO, DIFERENCIADORES, EQUIPO } from '@constants/e
          </p>
       </header>
 
-      <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-         {
-            EQUIPO.map((miembro, i) => (
-               <article class="panel flex h-full flex-col p-7" data-reveal data-reveal-delay={i * 100}>
-                  {/* Las fotos del material de marca están marcadas como
-                      provisionales por el cliente, así que se usa un avatar
-                      con iniciales en lugar de publicar imágenes que se van a
-                      sustituir. */}
-                  <span
-                     class="flex h-16 w-16 items-center justify-center rounded-full border border-accent/30 bg-accent/10 font-serif text-xl text-accent"
-                     aria-hidden="true"
-                  >
-                     {miembro.iniciales}
-                  </span>
-
-                  <p class="mt-5 text-[11px] uppercase tracking-widest text-accent">{miembro.area}</p>
-                  <h3 class="mt-2 text-lg font-semibold leading-snug">{miembro.nombre}</h3>
-
-                  <ul class="mt-3 flex flex-col gap-1">
-                     {miembro.credenciales.map((c) => (
-                        <li class="text-xs leading-relaxed text-muted">{c}</li>
-                     ))}
-                  </ul>
-
-                  <p class="mt-4 border-t border-line pt-4 text-sm leading-relaxed text-muted">{miembro.bio}</p>
-               </article>
-            ))
-         }
-      </div>
+      <TeamCarousel />
    </section>
 
    <section class="container-site py-section" aria-labelledby="diferenciadores">

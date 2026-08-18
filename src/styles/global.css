@@ -233,7 +233,7 @@ html:not(.dark) {
 
 /* ===========================================================================
    ACCESIBILIDAD DE MOVIMIENTO
-   El canvas de constelación y el reveal se apagan por completo; el resto de
+   El campo de estrellas y el reveal se apagan por completo; el resto de
    animaciones se reducen a un frame.
    =========================================================================== */
 @media (prefers-reduced-motion: reduce) {

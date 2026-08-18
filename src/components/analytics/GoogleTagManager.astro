@@ -2,16 +2,21 @@
 /**
  * Google Tag Manager — parte de <head>.
  *
- * El <noscript> con el iframe NO va aquí: es GoogleTagManagerBody.astro y debe
- * ser el primer hijo de <body>. En Movapp los dos están en el mismo componente
- * montado en el <head>, lo que produce un <iframe> dentro de <head> — HTML
- * inválido que el navegador reubica.
+ * El noscript con el iframe NO va aquí: es GoogleTagManagerBody.astro y debe
+ * ser el primer hijo del body. En Movapp los dos están en el mismo componente
+ * montado en el head, lo que produce un iframe dentro del head — HTML inválido
+ * que el navegador reubica.
  *
  * `is:inline` + `define:vars` es el patrón para pasar una variable del servidor
- * a un script inline. OJO: el contenido de un <script> se emite como texto
- * crudo y Astro NO evalúa expresiones dentro. Va escrito como JavaScript
+ * a un script inline. OJO: el contenido de la etiqueta script se emite como
+ * texto crudo y Astro NO evalúa expresiones dentro. Va escrito como JavaScript
  * normal; envolverlo en {`...`} imprimiría las llaves y los backticks tal cual
  * y el script no llegaría a ejecutarse.
+ *
+ * IMPORTANTE: no escribir la etiqueta script con sus signos de menor/mayor
+ * dentro de este comentario. El escaneo de dependencias de Vite la detecta como
+ * una etiqueta real y trata el texto siguiente como JavaScript, lo que rompe
+ * `astro dev` con «Failed to scan for dependencies from entries».
  */
 const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
 ---

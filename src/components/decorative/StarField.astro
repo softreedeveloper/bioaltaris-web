@@ -1,0 +1,240 @@
+---
+/**
+ * Fondo de estrellas: puntos que titilan + estrellas fugaces que cruzan la
+ * sección cada cierto tiempo. Es el mismo efecto del home de Movapp,
+ * reescrito sobre los tokens de color de BioAltaris (`--accent` en vez del
+ * morado de Movapp) para que respete el tema claro/oscuro del sitio.
+ *
+ * Sustituye al canvas de constelación: aquí no hay canvas ni bucle de
+ * `requestAnimationFrame`. Cada estrella es un span que anima solo
+ * `opacity` y `transform`, dos propiedades que el compositor resuelve sin
+ * tocar el hilo principal, así que el fondo no compite con el scroll.
+ *
+ * Se mantienen las tres garantías que ya cumplía el componente anterior:
+ * se respeta `prefers-reduced-motion`, no se genera nada mientras la sección
+ * está fuera del viewport o la pestaña en segundo plano, y la cantidad de
+ * estrellas se escala al ancho de pantalla en vez de ser fija.
+ */
+interface Props {
+   /** Identifica la instancia: decide el desfase de su primera fugaz. */
+   id: string;
+   /** Estrellas ambiente en pantalla grande. En móvil se reduce a la mitad. */
+   ambiente?: number;
+   class?: string;
+}
+
+const { id, ambiente = 45, class: className = '' } = Astro.props;
+---
+
+<div
+   data-starfield={id}
+   data-ambiente={ambiente}
+   class:list={['pointer-events-none absolute inset-0 overflow-hidden', className]}
+   aria-hidden="true"
+>
+   <!-- Estrellas ambiente (las puebla el script) -->
+   <div class="starfield-stars absolute inset-0 text-accent dark:text-white"></div>
+
+   <!-- Estrellas fugaces: se crean y se destruyen una por una -->
+   <div class="starfield-shooting absolute inset-0 overflow-hidden text-accent dark:text-white"></div>
+</div>
+
+<style>
+   /*
+      El `box-shadow` es FIJO, no animado. Animar su radio obliga a repintar
+      cada estrella en cada frame; animando solo `opacity` el halo late igual
+      (la opacidad afecta al elemento completo, box-shadow incluido) pero el
+      trabajo se queda en el compositor.
+   */
+   :global(.starfield-star) {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      border-radius: 9999px;
+      background-color: currentColor;
+      box-shadow: 0 0 var(--star-glow, 2px) currentColor;
+      animation-name: starfieldTwinkle;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      will-change: opacity;
+   }
+
+   @keyframes starfieldTwinkle {
+      0%,
+      100% {
+         opacity: var(--star-min, 0.15);
+      }
+      50% {
+         opacity: var(--star-max, 0.9);
+      }
+   }
+
+   :global(.starfield-shooting-star) {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 9999px;
+      background-color: currentColor;
+      box-shadow: 0 0 6px 1px currentColor;
+      opacity: 0;
+      animation-name: starfieldShoot;
+      animation-duration: var(--shoot-dur, 1.1s);
+      animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
+      animation-fill-mode: forwards;
+   }
+
+   /* La estela: un degradado que se desvanece por detrás del punto. */
+   :global(.starfield-shooting-star::after) {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      width: var(--trail-length, 90px);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, currentColor);
+      transform: translateY(-50%);
+   }
+
+   @keyframes starfieldShoot {
+      0% {
+         opacity: 0;
+         transform: rotate(var(--angle, 25deg)) translateX(0);
+      }
+      8% {
+         opacity: 1;
+      }
+      70% {
+         opacity: 1;
+      }
+      100% {
+         opacity: 0;
+         transform: rotate(var(--angle, 25deg)) translateX(var(--distance, 180px));
+      }
+   }
+</style>
+
+<script>
+   const TAM_MIN = 1;
+   const TAM_MAX = 2.2;
+   const INTERVALO_MIN_MS = 2500;
+   const INTERVALO_MAX_MS = 6000;
+
+   const crearEstrellaAmbiente = (tam: number) => {
+      const estrella = document.createElement('span');
+      estrella.className = 'starfield-star';
+
+      const duracion = 2 + Math.random() * 3;
+      const retraso = Math.random() * 5;
+      const opacidadMin = 0.08 + Math.random() * 0.12;
+      const opacidadMax = 0.6 + Math.random() * 0.4;
+
+      estrella.style.width = `${tam}px`;
+      estrella.style.height = `${tam}px`;
+      estrella.style.top = `${Math.random() * 100}%`;
+      estrella.style.left = `${Math.random() * 100}%`;
+      estrella.style.animationDuration = `${duracion}s`;
+      estrella.style.animationDelay = `${retraso}s`;
+      estrella.style.setProperty('--star-min', opacidadMin.toFixed(2));
+      estrella.style.setProperty('--star-max', opacidadMax.toFixed(2));
+      estrella.style.setProperty('--star-glow', `${(tam * 2.2).toFixed(2)}px`);
+
+      return estrella;
+   };
+
+   const lanzarFugaz = (contenedor: Element) => {
+      const estrella = document.createElement('span');
+      estrella.className = 'starfield-shooting-star';
+
+      // Arrancan en la mitad superior izquierda para que la diagonal quepa
+      // entera dentro de la sección antes de apagarse.
+      const distancia = 140 + Math.random() * 140;
+
+      estrella.style.top = `${Math.random() * 55}%`;
+      estrella.style.left = `${Math.random() * 70}%`;
+      estrella.style.setProperty('--shoot-dur', `${(0.9 + Math.random() * 0.6).toFixed(2)}s`);
+      estrella.style.setProperty('--angle', `${(15 + Math.random() * 25).toFixed(1)}deg`);
+      estrella.style.setProperty('--distance', `${distancia.toFixed(0)}px`);
+      estrella.style.setProperty('--trail-length', `${(distancia * 0.5).toFixed(0)}px`);
+
+      estrella.addEventListener('animationend', () => estrella.remove());
+      contenedor.appendChild(estrella);
+   };
+
+   /** Hash del id: reparte el arranque para que dos secciones no lancen a la vez. */
+   const hashId = (id: string) => {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+      return hash;
+   };
+
+   const initCampo = (raiz: HTMLElement) => {
+      if (raiz.dataset.poblado === 'true') return;
+      raiz.dataset.poblado = 'true';
+
+      // En móvil la mitad de estrellas: misma sensación, la mitad de nodos.
+      const base = Number(raiz.dataset.ambiente || 45);
+      const cantidad = window.innerWidth < 640 ? Math.round(base / 2) : base;
+
+      const contenedorEstrellas = raiz.querySelector('.starfield-stars');
+      if (contenedorEstrellas) {
+         const fragmento = document.createDocumentFragment();
+         for (let i = 0; i < cantidad; i++) {
+            fragmento.appendChild(crearEstrellaAmbiente(TAM_MIN + Math.random() * (TAM_MAX - TAM_MIN)));
+         }
+         contenedorEstrellas.appendChild(fragmento);
+      }
+
+      const contenedorFugaces = raiz.querySelector('.starfield-shooting');
+      if (!contenedorFugaces) return;
+
+      // Solo se lanzan estrellas mientras la sección está a la vista y la
+      // pestaña en primer plano; si no, el temporizador seguiría creando y
+      // destruyendo nodos que nadie ve.
+      let visible = false;
+      let temporizador = 0;
+
+      const programar = (retraso: number) => {
+         temporizador = window.setTimeout(() => {
+            if (visible && !document.hidden) lanzarFugaz(contenedorFugaces);
+            programar(INTERVALO_MIN_MS + Math.random() * (INTERVALO_MAX_MS - INTERVALO_MIN_MS));
+         }, retraso);
+      };
+
+      const parar = () => {
+         window.clearTimeout(temporizador);
+         temporizador = 0;
+      };
+
+      const sincronizar = () => {
+         if (visible && !document.hidden) {
+            if (!temporizador) programar(INTERVALO_MIN_MS);
+         } else {
+            parar();
+         }
+      };
+
+      new IntersectionObserver(
+         ([entrada]) => {
+            visible = entrada.isIntersecting;
+            sincronizar();
+         },
+         { threshold: 0 },
+      ).observe(raiz);
+
+      document.addEventListener('visibilitychange', sincronizar);
+
+      // Desfase inicial por instancia, acotado al primer intervalo.
+      programar(hashId(raiz.dataset.starfield || '') % INTERVALO_MIN_MS);
+   };
+
+   const initCampos = () => {
+      // Sin movimiento no hay estrellas: el fondo se queda liso, igual que
+      // hacía el canvas de constelación al que sustituye.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      document.querySelectorAll<HTMLElement>('[data-starfield]').forEach(initCampo);
+   };
+
+   initCampos();
+   document.addEventListener('astro:page-load', initCampos);
+</script>
