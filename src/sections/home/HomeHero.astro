@@ -1,58 +1,95 @@
 ---
+/**
+ * Hero a dos columnas (mock aprobado en septiembre de 2026): texto a la
+ * izquierda, gráfico orbital de las cuatro etapas a la derecha y, debajo, una
+ * franja con las mismas etapas. El copy es el aprobado por el cliente.
+ */
 import StarField from '@components/decorative/StarField.astro';
+import HeroAdn from '@components/decorative/HeroAdn.astro';
+import Icon from '@components/ui/Icon.astro';
+import HeroOrbita from './HeroOrbita.astro';
 import { CTA_PRINCIPAL } from '@constants/navegacion';
-import { SERVICIOS, CATEGORIAS } from '@constants/servicios';
+import { FASES } from '@constants/fases';
 ---
 
 <section class="relative overflow-hidden">
    <StarField id="hero" ambiente={55} />
+   <HeroAdn />
 
-   <div class="container-site relative py-20 text-center sm:py-28 lg:py-36">
-      <p class="eyebrow">Consultoría biofarmacéutica</p>
+   <div class="container-wide relative py-14 sm:py-20 lg:py-24">
+      <div class="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+         <div>
+            <p class="eyebrow">Consultoría biofarmacéutica</p>
 
-      <h1 class="mx-auto mt-5 max-w-3xl text-[clamp(2.25rem,6vw,3.75rem)] font-normal">
-         La constelación de tu <span class="gradient-text">éxito regulatorio</span>
-      </h1>
+            <h1 class="mt-5 max-w-2xl text-[clamp(2.4rem,5.2vw,4rem)] font-semibold leading-[1.05] tracking-tight">
+               Rumbo claro para tu <span class="text-accent">investigación biofarmacéutica</span>
+            </h1>
 
-      <p class="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-         Cada servicio es un nodo crítico conectado hacia un único objetivo: llevar tu desarrollo biológico desde el
-         laboratorio hasta un activo protegido y validado.
-      </p>
+            <p class="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+               Desarrollo y transferencia de métodos analíticos y bioensayos, caracterización fisicoquímica y estudios
+               no clínicos, con implementación en tu laboratorio, estrategia regulatoria y propiedad intelectual.
+            </p>
 
-      <div class="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-         <a href={CTA_PRINCIPAL.href} id="cta-home-hero" data-cta="home_hero" class="btn-primary">
-            {CTA_PRINCIPAL.label}
-         </a>
-         <a href="/servicios" class="btn-ghost">Ver servicios</a>
+            <div class="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+               <a href="/servicios" class="btn-primary">
+                  Ver servicios
+                  <span aria-hidden="true">→</span>
+               </a>
+               <a href={CTA_PRINCIPAL.href} id="cta-home-hero" data-cta="home_hero" class="btn-ghost">
+                  {CTA_PRINCIPAL.label}
+               </a>
+            </div>
+         </div>
+
+         <div
+            class="mx-auto w-full max-w-[340px] sm:max-w-[440px] lg:mx-0 lg:max-w-[460px] lg:justify-self-start"
+            data-reveal="right"
+         >
+            <HeroOrbita />
+         </div>
       </div>
 
-      <dl
-         class="mx-auto mt-14 grid max-w-lg grid-cols-3 gap-4 border-t border-line pt-8 text-center sm:mt-16 sm:gap-8"
+      <ul
+         class="mt-14 grid grid-cols-2 gap-y-8 border-t border-line pt-8 sm:grid-cols-4 sm:divide-x sm:divide-line lg:mt-20 xl:grid-cols-[repeat(4,1fr)_auto]"
+         role="list"
       >
-         <div>
-            <dt class="sr-only">Servicios</dt>
-            <dd class="font-serif text-2xl text-accent sm:text-3xl">{SERVICIOS.length}</dd>
-            <p class="mt-1 text-[11px] uppercase tracking-widest text-muted">Servicios</p>
-         </div>
-         <div>
-            <dt class="sr-only">Etapas</dt>
-            <dd class="font-serif text-2xl text-accent sm:text-3xl">{CATEGORIAS.length}</dd>
-            <p class="mt-1 text-[11px] uppercase tracking-widest text-muted">Etapas</p>
-         </div>
-         <div>
-            <dt class="sr-only">Idiomas de entrega</dt>
-            <dd class="font-serif text-2xl text-accent sm:text-3xl">ES/EN</dd>
-            <p class="mt-1 text-[11px] uppercase tracking-widest text-muted">Entrega</p>
-         </div>
-      </dl>
+         {
+            FASES.map((fase) => (
+               <li class="pr-4 sm:px-6 sm:first:pl-0">
+                  <a href="#ruta-titulo" class="group flex items-start gap-3">
+                     <span
+                        class:list={[
+                           'mt-0.5 shrink-0 transition group-hover:scale-110',
+                           fase.acento === 'azul' ? 'text-accent2' : 'text-accent',
+                        ]}
+                     >
+                        <Icon name={fase.icono} class="h-6 w-6" />
+                     </span>
+                     <span class="flex flex-col gap-1">
+                        <span class="text-sm font-semibold leading-snug transition group-hover:text-accent">
+                           {fase.titulo}
+                        </span>
+                        <span class="text-[10px] uppercase leading-snug tracking-widest text-muted">{fase.lema}</span>
+                     </span>
+                  </a>
+               </li>
+            ))
+         }
+         <li
+            class="col-span-2 hidden items-center justify-end pl-6 text-[11px] uppercase tracking-eyebrow text-muted sm:col-span-4 xl:col-span-1 xl:flex"
+         >
+            Biotecnología con rumbo
+         </li>
+      </ul>
    </div>
 </section>
 
 <script>
    import { trackCta, trackMeta } from '@utils/analytics';
+   import { CTA_PRINCIPAL } from '@constants/navegacion';
 
    document.getElementById('cta-home-hero')?.addEventListener('click', () => {
-      trackCta('home_hero', 'Iniciar proyecto');
+      trackCta('home_hero', CTA_PRINCIPAL.label);
       trackMeta('Lead', { content_name: 'CTA hero', content_category: 'lead_generation' });
    });
 </script>

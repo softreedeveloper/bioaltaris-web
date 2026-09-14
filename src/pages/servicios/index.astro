@@ -1,218 +1,422 @@
 ---
+/**
+ * Catálogo de servicios como explorador por etapa (maqueta "Elige la etapa de
+ * tu desarrollo", revisión de septiembre de 2026): una barra con las tres
+ * etapas, a la izquierda la lista de servicios de la etapa activa y a la
+ * derecha la ficha del servicio seleccionado.
+ *
+ * Todo el contenido se renderiza en servidor (las tres listas y las doce
+ * fichas) y el script solo alterna `hidden`. Así la página es completa sin JS
+ * y para los buscadores, y el cambio de etapa o de servicio es instantáneo.
+ */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
-import ServiceCard from '@components/ui/ServiceCard.astro';
+import Icon from '@components/ui/Icon.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
-import { CATEGORIAS, SERVICIOS } from '@constants/servicios';
+import { CATEGORIAS, serviciosPorCategoria } from '@constants/servicios';
+
+const etapas = CATEGORIAS.map((categoria) => ({
+   ...categoria,
+   servicios: serviciosPorCategoria(categoria.id),
+}));
+
+const acentoDe = (acento: 'verde' | 'azul') => (acento === 'azul' ? 'text-accent2' : 'text-accent');
 ---
 
-<BaseLayout title="Servicios | BioAltaris">
-   <section class="container-wide pb-6 pt-10 lg:pt-14">
+<BaseLayout>
+   <section class="container-site pb-6 pt-10 lg:pt-14">
       <Breadcrumbs />
 
       <header class="mt-6 max-w-3xl">
-         <p class="eyebrow">Ruta estratégica</p>
-         <h1 class="mt-4 text-4xl sm:text-5xl">Catálogo de servicios</h1>
+         <h1 class="text-4xl sm:text-5xl">Elige la etapa de tu desarrollo</h1>
          <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg">
-            {SERVICIOS.length} servicios organizados en {CATEGORIAS.length} etapas. Puedes contratarlos por separado o
-            recorrerlos en secuencia hasta el expediente regulatorio.
+            Diseñamos contigo cada estudio y lo implementamos junto a tu equipo, desde la evidencia biológica hasta el
+            expediente.
          </p>
       </header>
    </section>
 
-   <div class="container-wide grid gap-8 pb-section lg:grid-cols-[320px_1fr] lg:gap-14">
-      <!-- Filtros. En móvil son chips que se deslizan; desde lg, una barra
-           lateral pegajosa. -->
-      <aside class="lg:sticky lg:top-28 lg:self-start">
-         <h2 class="eyebrow hidden lg:block">Filtrar por etapa</h2>
-
-         <div class="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:overflow-visible lg:px-0">
-            <div class="flex gap-3 pb-2 lg:mt-5 lg:flex-col lg:gap-2 lg:pb-0" role="tablist" aria-label="Etapas">
-               <button
-                  type="button"
-                  role="tab"
-                  data-filtro="todos"
-                  aria-selected="true"
-                  class="filtro shrink-0 lg:w-full"
-               >
-                  <span class="filtro-num">00</span>
-                  <span class="filtro-texto">
-                     <span class="filtro-nombre">Todos los servicios</span>
-                     <span class="filtro-lema">Las tres etapas</span>
-                  </span>
-               </button>
-
-               {
-                  CATEGORIAS.map((cat) => (
-                     <button
-                        type="button"
-                        role="tab"
-                        data-filtro={cat.id}
-                        aria-selected="false"
-                        class="filtro shrink-0 lg:w-full"
-                     >
-                        <span class="filtro-num">{cat.numero}</span>
-                        <span class="filtro-texto">
-                           <span class="filtro-nombre">{cat.nombre}</span>
-                           <span class="filtro-lema">{cat.lema}</span>
-                        </span>
-                     </button>
-                  ))
-               }
-            </div>
-         </div>
-
-         <p class="mt-6 hidden text-sm leading-relaxed text-muted lg:block" id="filtroDescripcion">
-            Los tres bloques cubren el recorrido completo: evidencia biológica, caracterización del producto y estrategia
-            regulatoria.
-         </p>
-      </aside>
-
-      <div>
-         <p class="sr-only" role="status" aria-live="polite" id="filtroEstado">
-            Mostrando los {SERVICIOS.length} servicios.
-         </p>
-
-         <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" id="gridServicios">
+   <div class="container-site pb-section" id="explorador">
+      <!-- Barra de etapas -->
+      <div class="rounded-2xl border border-line p-1.5 md:rounded-full" role="tablist" aria-label="Etapas">
+         <div class="grid gap-1.5 md:grid-cols-3">
             {
-               SERVICIOS.map((servicio, i) => (
-                  <div data-categoria={servicio.categoria}>
-                     <ServiceCard servicio={servicio} delay={(i % 3) * 80} />
-                  </div>
+               etapas.map((etapa, i) => (
+                  <button
+                     type="button"
+                     role="tab"
+                     id={`tab-${etapa.id}`}
+                     data-etapa={etapa.id}
+                     aria-selected={i === 0 ? 'true' : 'false'}
+                     aria-controls={`panel-${etapa.id}`}
+                     tabindex={i === 0 ? 0 : -1}
+                     class="etapa"
+                  >
+                     <span class="etapa-num">{etapa.numero}</span>
+                     <span class="flex flex-col gap-0.5">
+                        <span class="text-sm font-semibold leading-snug">{etapa.nombre}</span>
+                        <span class="text-xs leading-snug text-muted">{etapa.lema}</span>
+                     </span>
+                  </button>
                ))
             }
          </div>
       </div>
+
+      <p class="sr-only" role="status" aria-live="polite" id="exploradorEstado"></p>
+
+      {
+         etapas.map((etapa, i) => (
+            <section
+               id={`panel-${etapa.id}`}
+               role="tabpanel"
+               aria-labelledby={`tab-${etapa.id}`}
+               data-panel-etapa={etapa.id}
+               hidden={i !== 0}
+               class="mt-8"
+            >
+               <p class="max-w-2xl text-base leading-relaxed text-muted">{etapa.descripcion}</p>
+
+               <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-10">
+                  {/* Lista de servicios de la etapa */}
+                  <ul class="flex flex-col gap-2" role="list" aria-label={`Servicios de ${etapa.nombre}`}>
+                     {etapa.servicios.map((servicio, j) => (
+                        <li>
+                           <button
+                              type="button"
+                              class="servicio-item"
+                              data-servicio={servicio.slug}
+                              aria-pressed={j === 0 ? 'true' : 'false'}
+                              aria-controls={`ficha-${servicio.slug}`}
+                           >
+                              <span class:list={['servicio-icono', acentoDe(servicio.acento)]}>
+                                 <Icon name={servicio.icono} class="h-5 w-5" />
+                              </span>
+                              <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                 <span class="text-lg font-medium leading-snug">{servicio.titulo}</span>
+                                 <span
+                                    class:list={[
+                                       'text-[10px] font-semibold uppercase tracking-widest',
+                                       acentoDe(servicio.acento),
+                                    ]}
+                                 >
+                                    {servicio.tag}
+                                 </span>
+                              </span>
+                              <span class="servicio-flecha" aria-hidden="true">
+                                 →
+                              </span>
+                           </button>
+                        </li>
+                     ))}
+                  </ul>
+
+                  {/* Fichas: solo una visible a la vez */}
+                  <div class="lg:sticky lg:top-28 lg:self-start">
+                     {etapa.servicios.map((servicio, j) => (
+                        <article
+                           id={`ficha-${servicio.slug}`}
+                           data-ficha={servicio.slug}
+                           hidden={j !== 0}
+                           class="ficha panel relative overflow-hidden p-7 sm:p-9"
+                        >
+                           <span class="absolute right-7 top-7 text-sm font-medium tabular-nums text-muted sm:right-9 sm:top-9">
+                              {String(j + 1).padStart(2, '0')} / {String(etapa.servicios.length).padStart(2, '0')}
+                           </span>
+
+                           <span
+                              class:list={[
+                                 'flex h-24 w-24 items-center justify-center rounded-full border border-current/40 bg-bg/40',
+                                 acentoDe(servicio.acento),
+                              ]}
+                              aria-hidden="true"
+                           >
+                              <Icon name={servicio.icono} class="h-9 w-9" />
+                           </span>
+
+                           <p
+                              class:list={[
+                                 'mt-8 text-[11px] font-semibold uppercase tracking-eyebrow',
+                                 acentoDe(servicio.acento),
+                              ]}
+                           >
+                              {servicio.tag}
+                           </p>
+                           <h2 class="mt-2 text-3xl sm:text-4xl">{servicio.titulo}</h2>
+                           <p class="mt-4 text-base leading-relaxed text-muted">{servicio.resumen}</p>
+
+                           <div class="mt-6 border-t border-line pt-6">
+                              <h3 class="text-[11px] uppercase tracking-widest text-muted">Qué incluye</h3>
+                              <ul class="mt-4 flex flex-col gap-2.5">
+                                 {servicio.alcance.slice(0, 2).map((item) => (
+                                    <li class="flex gap-3 text-sm leading-relaxed">
+                                       <span
+                                          class:list={[
+                                             'mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-current',
+                                             acentoDe(servicio.acento),
+                                          ]}
+                                          aria-hidden="true"
+                                       />
+                                       {item}
+                                    </li>
+                                 ))}
+                              </ul>
+                           </div>
+
+                           <div class="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-6">
+                              <a
+                                 href="/contacto"
+                                 class="btn-primary"
+                                 data-cta="servicios_ficha"
+                                 data-servicio-cta={servicio.slug}
+                              >
+                                 Solicitar asesoría
+                              </a>
+                              <a
+                                 href={`/servicios/${servicio.slug}`}
+                                 class:list={[
+                                    'text-sm font-semibold transition hover:underline',
+                                    acentoDe(servicio.acento),
+                                 ]}
+                              >
+                                 Ver metodología →
+                              </a>
+                           </div>
+                        </article>
+                     ))}
+                  </div>
+               </div>
+            </section>
+         ))
+      }
    </div>
 
    <CtaSection location="servicios_final" />
 </BaseLayout>
 
 <style>
-   .filtro {
+   .etapa {
       display: flex;
       align-items: center;
-      gap: 0.875rem;
+      gap: 1rem;
       min-height: 44px;
-      padding: 0.875rem 1rem;
-      border: 1px solid rgb(var(--line));
-      border-radius: 0.75rem;
+      padding: 0.875rem 1.25rem;
+      border: 1px solid transparent;
+      border-radius: 1rem;
       text-align: left;
       transition:
          border-color 0.2s ease,
-         background-color 0.2s ease,
-         transform 0.2s ease;
+         background-color 0.2s ease;
    }
 
-   .filtro:hover {
-      border-color: rgb(var(--accent) / 0.4);
-   }
-
-   @media (min-width: 1024px) {
-      .filtro:hover {
-         transform: translateX(4px);
+   @media (min-width: 768px) {
+      .etapa {
+         border-radius: 999px;
       }
    }
 
-   .filtro[aria-selected='true'] {
-      border-color: rgb(var(--accent) / 0.5);
-      background-image: linear-gradient(100deg, rgb(var(--accent) / 0.1), rgb(var(--bg-2) / 0.5));
+   .etapa:hover {
+      border-color: rgb(var(--accent) / 0.3);
    }
 
-   .filtro-num {
-      font-family: theme('fontFamily.serif');
-      font-size: 0.875rem;
+   .etapa[aria-selected='true'] {
+      border-color: rgb(var(--accent) / 0.5);
+      background-image: linear-gradient(100deg, rgb(var(--accent) / 0.12), rgb(var(--bg-2) / 0.6));
+   }
+
+   .etapa-num {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      font-size: 1.75rem;
+      line-height: 1;
       color: rgb(var(--muted));
    }
 
-   .filtro[aria-selected='true'] .filtro-num {
+   .etapa[aria-selected='true'] .etapa-num {
       color: rgb(var(--accent));
    }
 
-   .filtro-texto {
+   .servicio-item {
       display: flex;
-      flex-direction: column;
-      gap: 0.125rem;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      min-height: 44px;
+      padding: 0.875rem 1.25rem 0.875rem 0.875rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      text-align: left;
+      transition:
+         border-color 0.2s ease,
+         background-color 0.2s ease;
    }
 
-   .filtro-nombre {
-      font-size: 0.875rem;
-      font-weight: 600;
-      white-space: nowrap;
+   .servicio-item:hover {
+      border-color: rgb(var(--accent) / 0.3);
    }
 
-   .filtro-lema {
-      font-size: 0.6875rem;
-      color: rgb(var(--muted));
-      white-space: nowrap;
+   .servicio-item[aria-pressed='true'] {
+      border-color: rgb(var(--accent) / 0.5);
+      background-image: linear-gradient(100deg, rgb(var(--accent) / 0.12), rgb(var(--bg-2) / 0.6));
    }
 
-   @media (min-width: 1024px) {
-      .filtro-nombre,
-      .filtro-lema {
-         white-space: normal;
-      }
+   .servicio-icono {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 999px;
+      border: 1px solid rgb(var(--line));
+      background: rgb(var(--bg) / 0.6);
+      transition:
+         background-color 0.2s ease,
+         color 0.2s ease;
+   }
+
+   .servicio-item[aria-pressed='true'] .servicio-icono {
+      border-color: transparent;
+      background: rgb(var(--accent));
+      color: #06121f;
+   }
+
+   html:not(.dark) .servicio-item[aria-pressed='true'] .servicio-icono {
+      color: #fff;
+   }
+
+   .servicio-flecha {
+      opacity: 0;
+      color: rgb(var(--accent));
+      transition: opacity 0.2s ease;
+   }
+
+   .servicio-item[aria-pressed='true'] .servicio-flecha {
+      opacity: 1;
+   }
+
+   .ficha {
+      animation: theme('animation.fadeUp');
    }
 </style>
 
 <script>
    import { pushEvent } from '@utils/analytics';
-   import { CATEGORIAS } from '@constants/servicios';
 
-   const botones = document.querySelectorAll<HTMLButtonElement>('[data-filtro]');
-   const tarjetas = document.querySelectorAll<HTMLElement>('#gridServicios > [data-categoria]');
-   const estado = document.getElementById('filtroEstado');
-   const descripcion = document.getElementById('filtroDescripcion');
+   const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-etapa]'));
+   const paneles = Array.from(document.querySelectorAll<HTMLElement>('[data-panel-etapa]'));
+   const estado = document.getElementById('exploradorEstado');
 
-   const descripciones: Record<string, string> = {
-      todos: descripcion?.textContent?.trim() ?? '',
-      ...Object.fromEntries(CATEGORIAS.map((c) => [c.id, c.descripcion])),
-   };
+   const fichaDe = (slug: string) => document.querySelector<HTMLElement>(`[data-ficha="${slug}"]`);
 
-   function aplicar(filtro: string) {
-      botones.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.filtro === filtro)));
+   function mostrarServicio(slug: string, anunciar = true) {
+      const ficha = fichaDe(slug);
+      if (!ficha) return;
 
-      let visibles = 0;
-      tarjetas.forEach((tarjeta) => {
-         const coincide = filtro === 'todos' || tarjeta.dataset.categoria === filtro;
-         tarjeta.hidden = !coincide;
-         if (!coincide) return;
+      const panel = ficha.closest<HTMLElement>('[data-panel-etapa]');
+      if (!panel) return;
 
-         visibles++;
-         // Reinicia la animación de entrada: sin forzar un reflow el navegador
-         // agrupa el quitar y poner la clase y no se ve nada.
-         const card = tarjeta.firstElementChild as HTMLElement | null;
-         if (card) {
-            card.classList.remove('animate-fadeUp');
-            void card.offsetHeight;
-            card.classList.add('animate-fadeUp');
+      panel.querySelectorAll<HTMLElement>('[data-ficha]').forEach((f) => {
+         const activa = f === ficha;
+         f.hidden = !activa;
+         if (activa) {
+            // Reinicia la animación de entrada: sin forzar un reflow el
+            // navegador agrupa el quitar y poner la clase y no se ve nada.
+            f.classList.remove('ficha');
+            void f.offsetHeight;
+            f.classList.add('ficha');
          }
       });
+      panel.querySelectorAll<HTMLButtonElement>('[data-servicio]').forEach((b) => {
+         b.setAttribute('aria-pressed', String(b.dataset.servicio === slug));
+      });
 
-      if (estado) {
-         estado.textContent =
-            visibles === 1 ? 'Mostrando 1 servicio.' : `Mostrando ${visibles} servicios.`;
+      if (anunciar && estado) {
+         const titulo = ficha.querySelector('h2')?.textContent?.trim() ?? slug;
+         estado.textContent = `Mostrando ${titulo}.`;
       }
-      if (descripcion && descripciones[filtro]) {
-         descripcion.textContent = descripciones[filtro];
-      }
-
-      pushEvent('filter_services', { filter_category: filtro, results_count: visibles });
    }
 
-   botones.forEach((boton) => {
-      boton.addEventListener('click', () => {
-         const filtro = boton.dataset.filtro;
-         if (!filtro) return;
-         aplicar(filtro);
-         // Refleja el filtro en la URL para poder compartir/volver a él
-         const url = new URL(window.location.href);
-         filtro === 'todos' ? url.searchParams.delete('etapa') : url.searchParams.set('etapa', filtro);
-         history.replaceState(null, '', url);
+   function mostrarEtapa(id: string, slug?: string) {
+      const panel = paneles.find((p) => p.dataset.panelEtapa === id);
+      if (!panel) return;
+
+      tabs.forEach((t) => {
+         const activo = t.dataset.etapa === id;
+         t.setAttribute('aria-selected', String(activo));
+         t.tabIndex = activo ? 0 : -1;
+      });
+      paneles.forEach((p) => (p.hidden = p !== panel));
+
+      const primero = panel.querySelector<HTMLButtonElement>('[data-servicio]')?.dataset.servicio;
+      const objetivo = slug && fichaDe(slug)?.closest('[data-panel-etapa]') === panel ? slug : primero;
+      if (objetivo) mostrarServicio(objetivo, false);
+
+      if (estado) {
+         const nombre = tabs.find((t) => t.dataset.etapa === id)?.textContent?.trim() ?? id;
+         estado.textContent = `Etapa ${nombre}.`;
+      }
+   }
+
+   function reflejarUrl(id: string, slug?: string) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('etapa', id);
+      url.hash = slug ?? '';
+      history.replaceState(null, '', url);
+   }
+
+   tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => {
+         const id = tab.dataset.etapa;
+         if (!id) return;
+         mostrarEtapa(id);
+         reflejarUrl(id);
+         pushEvent('filter_services', { filter_category: id });
+      });
+
+      // Flechas entre pestañas, como pide el patrón de tabs de WAI-ARIA.
+      tab.addEventListener('keydown', (e) => {
+         if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+         e.preventDefault();
+         const siguiente = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+         siguiente.focus();
+         siguiente.click();
       });
    });
 
-   // Entrada directa desde /servicios?etapa=… o desde los enlaces del footer
-   const inicial = new URL(window.location.href).searchParams.get('etapa') ?? window.location.hash.slice(1);
-   if (inicial && descripciones[inicial]) aplicar(inicial);
+   document.querySelectorAll<HTMLButtonElement>('[data-servicio]').forEach((boton) => {
+      boton.addEventListener('click', () => {
+         const slug = boton.dataset.servicio;
+         const id = boton.closest<HTMLElement>('[data-panel-etapa]')?.dataset.panelEtapa;
+         if (!slug || !id) return;
+         mostrarServicio(slug);
+         reflejarUrl(id, slug);
+         pushEvent('select_service', { service_slug: slug, service_category: id });
+      });
+   });
+
+   document.querySelectorAll<HTMLAnchorElement>('[data-servicio-cta]').forEach((enlace) => {
+      enlace.addEventListener('click', () => {
+         pushEvent('cta_iniciar_proyecto', {
+            cta_location: 'servicios_ficha',
+            cta_label: enlace.dataset.servicioCta,
+         });
+      });
+   });
+
+   // Entrada directa: /servicios?etapa=… (enlaces internos), /servicios#slug o
+   // /servicios#etapa (enlaces del footer).
+   const url = new URL(window.location.href);
+   const hash = url.hash.slice(1);
+   const etapaParam = url.searchParams.get('etapa');
+   const etapaDelHash = paneles.find((p) => p.dataset.panelEtapa === hash)?.dataset.panelEtapa;
+   const etapaDelSlug = fichaDe(hash)?.closest<HTMLElement>('[data-panel-etapa]')?.dataset.panelEtapa;
+   const inicial = etapaDelSlug ?? etapaDelHash ?? etapaParam;
+
+   if (inicial && paneles.some((p) => p.dataset.panelEtapa === inicial)) {
+      mostrarEtapa(inicial, etapaDelSlug ? hash : undefined);
+      if (etapaDelHash || etapaDelSlug) {
+         document.getElementById('explorador')?.scrollIntoView({ block: 'start' });
+      }
+   }
 </script>

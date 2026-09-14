@@ -12,9 +12,10 @@ export const NAV_LINKS: NavLink[] = [
    { href: '/contacto', label: 'Contacto' },
 ];
 
+/** CTA principal del sitio (header, hero, cierres). Cambiado a "Hablemos" en la revisión de septiembre de 2026. */
 export const CTA_PRINCIPAL = {
    href: '/contacto',
-   label: 'Iniciar proyecto',
+   label: 'Hablemos',
 };
 
 export const FOOTER_LEGAL: NavLink[] = [{ href: '/aviso-de-privacidad', label: 'Aviso de privacidad' }];

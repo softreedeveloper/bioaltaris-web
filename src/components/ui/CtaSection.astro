@@ -4,6 +4,8 @@
  * nosotros; `location` distingue en la medición desde qué página se convirtió.
  */
 import { getSiteConfig } from '@utils/config';
+import { CTA_PRINCIPAL } from '@constants/navegacion';
+import WhatsAppIcon from './WhatsAppIcon.astro';
 
 interface Props {
    location: string;
@@ -36,16 +38,23 @@ const id = `cta-${location.replace(/_/g, '-')}`;
       <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">{descripcion}</p>
 
       <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-         <a href="/contacto" id={id} data-cta={location} class="btn-primary">Iniciar proyecto</a>
-         <a href={`mailto:${cfg.contact.email}`} class="btn-ghost">{cfg.contact.email}</a>
+         <a href={CTA_PRINCIPAL.href} id={id} data-cta={location} class="btn-primary">{CTA_PRINCIPAL.label}</a>
+         <a href={cfg.whatsappUrl} target="_blank" rel="noopener noreferrer" data-whatsapp={location} class="btn-ghost">
+            <WhatsAppIcon class="h-4 w-4" />
+            Escríbenos por WhatsApp
+         </a>
       </div>
+
+      <a href={`mailto:${cfg.contact.email}`} class="mt-5 inline-block text-sm text-muted transition hover:text-accent">
+         {cfg.contact.email}
+      </a>
    </div>
 </section>
 
-<script is:inline define:vars={{ id, location }}>
+<script is:inline define:vars={{ id, location, label: CTA_PRINCIPAL.label }}>
    document.getElementById(id)?.addEventListener('click', () => {
       window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: 'cta_iniciar_proyecto', cta_location: location, cta_label: 'Iniciar proyecto' });
+      window.dataLayer.push({ event: 'cta_iniciar_proyecto', cta_location: location, cta_label: label });
       window.metaPixel?.track('Lead', { content_name: `CTA ${location}`, content_category: 'lead_generation' });
    });
 </script>

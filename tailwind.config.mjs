@@ -23,7 +23,6 @@ export default {
          },
          fontFamily: {
             sans: ['Inter Variable', 'Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
-            serif: ['Lora', 'Georgia', 'Times New Roman', 'serif'],
          },
          // Ritmo vertical único del sitio: cada <section> usa "py-section".
          spacing: {

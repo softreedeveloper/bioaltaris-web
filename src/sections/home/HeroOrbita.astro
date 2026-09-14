@@ -1,0 +1,140 @@
+---
+/**
+ * Gráfico orbital del hero: anillos concéntricos, un nodo central con halo y
+ * cuatro nodos satélite, uno por etapa del recorrido (FASES). Es decorativo
+ * (`aria-hidden`): las etapas se nombran como texto real en la franja que va
+ * debajo del hero.
+ *
+ * Las etiquetas van en HTML posicionado por porcentaje, no en `<text>` del
+ * SVG: así no escalan con el viewBox y siguen legibles en móvil.
+ */
+import { FASES } from '@constants/fases';
+
+const TAM = 520;
+const CENTRO = TAM / 2;
+const RADIO_NODOS = 170;
+const RADIO_ETIQUETAS = 228;
+/** Ángulos (grados, sentido horario desde las 12) de los cuatro satélites. */
+const ANGULOS = [-55, 35, 125, 215];
+
+const rad = (grados: number) => ((grados - 90) * Math.PI) / 180;
+
+const nodos = FASES.map((fase, i) => {
+   const a = rad(ANGULOS[i] ?? 0);
+   return {
+      corto: fase.corto,
+      acento: fase.acento,
+      x: CENTRO + RADIO_NODOS * Math.cos(a),
+      y: CENTRO + RADIO_NODOS * Math.sin(a),
+      etiquetaX: ((CENTRO + RADIO_ETIQUETAS * Math.cos(a)) / TAM) * 100,
+      etiquetaY: ((CENTRO + RADIO_ETIQUETAS * Math.sin(a)) / TAM) * 100,
+   };
+});
+
+const color = (acento: 'verde' | 'azul') => (acento === 'azul' ? 'rgb(var(--accent-2))' : 'rgb(var(--accent))');
+---
+
+<div class="orbita relative aspect-square w-full" aria-hidden="true">
+   <svg viewBox={`0 0 ${TAM} ${TAM}`} class="h-full w-full" fill="none">
+      {/* Anillos */}
+      <circle cx={CENTRO} cy={CENTRO} r="110" stroke="rgb(var(--line))" stroke-width="1"></circle>
+      <circle cx={CENTRO} cy={CENTRO} r="235" stroke="rgb(var(--line))" stroke-width="1"></circle>
+      <g class="orbita-anillo" style={`transform-origin: ${CENTRO}px ${CENTRO}px`}>
+         <circle
+            cx={CENTRO}
+            cy={CENTRO}
+            r={RADIO_NODOS}
+            stroke="rgb(var(--accent) / 0.35)"
+            stroke-width="1"
+            stroke-dasharray="3 9"
+         >
+         </circle>
+      </g>
+
+      {/* Conectores */}
+      {
+         nodos.map((n) => (
+            <line
+               x1={CENTRO}
+               y1={CENTRO}
+               x2={n.x}
+               y2={n.y}
+               stroke={color(n.acento)}
+               stroke-opacity="0.45"
+               stroke-width="1"
+            />
+         ))
+      }
+
+      {/* Nodo central */}
+      <circle cx={CENTRO} cy={CENTRO} r="34" fill="rgb(var(--accent) / 0.14)"></circle>
+      <circle cx={CENTRO} cy={CENTRO} r="13" fill="rgb(var(--accent))" class="orbita-centro"></circle>
+
+      {/* Satélites */}
+      {
+         nodos.map((n) => (
+            <>
+               <circle cx={n.x} cy={n.y} r="13" fill={color(n.acento)} fill-opacity="0.18" />
+               <circle cx={n.x} cy={n.y} r="7" fill={color(n.acento)} />
+            </>
+         ))
+      }
+
+      {/* Puntos ambiente sobre el anillo exterior */}
+      <circle
+         cx={CENTRO + 235 * Math.cos(rad(-20))}
+         cy={CENTRO + 235 * Math.sin(rad(-20))}
+         r="2.5"
+         fill="rgb(var(--accent))"
+         fill-opacity="0.7"></circle>
+      <circle
+         cx={CENTRO + 235 * Math.cos(rad(160))}
+         cy={CENTRO + 235 * Math.sin(rad(160))}
+         r="2.5"
+         fill="rgb(var(--accent-2))"
+         fill-opacity="0.7"></circle>
+      <circle
+         cx={CENTRO + 110 * Math.cos(rad(80))}
+         cy={CENTRO + 110 * Math.sin(rad(80))}
+         r="2"
+         fill="rgb(var(--text))"
+         fill-opacity="0.6"></circle>
+   </svg>
+
+   {
+      nodos.map((n) => (
+         <span
+            class="absolute hidden -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center text-[10px] font-semibold uppercase leading-tight tracking-eyebrow text-text sm:block"
+            style={`left:${n.etiquetaX}%; top:${n.etiquetaY}%`}
+         >
+            {n.corto}
+         </span>
+      ))
+   }
+</div>
+
+<style>
+   .orbita-anillo {
+      animation: theme('animation.spinSlow');
+      animation-duration: 40s;
+   }
+
+   .orbita-centro {
+      filter: drop-shadow(0 0 16px rgb(var(--accent) / 0.75));
+      animation: orbitaLatido 4s ease-in-out infinite;
+   }
+
+   html:not(.dark) .orbita-centro {
+      filter: drop-shadow(0 0 10px rgb(var(--accent) / 0.45));
+   }
+
+   @keyframes orbitaLatido {
+      0%,
+      100% {
+         opacity: 1;
+      }
+      50% {
+         opacity: 0.75;
+      }
+   }
+</style>

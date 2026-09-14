@@ -1,0 +1,64 @@
+---
+/**
+ * Plantilla de la imagen Open Graph (1200×630). Solo existe en desarrollo:
+ * se captura con Chrome headless (ver scripts/brand/generar-assets.mjs) y el
+ * PNG resultante se commitea en public/og/. En producción responde 404.
+ */
+import '@styles/global.css';
+import Isotipo from '@components/layout/Isotipo.astro';
+
+if (!import.meta.env.DEV) return new Response(null, { status: 404 });
+---
+
+<!doctype html>
+<html lang="es" class="dark">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="robots" content="noindex" />
+      <title>OG BioAltaris</title>
+      <style>
+         html,
+         body {
+            margin: 0;
+            width: 1200px;
+            height: 630px;
+            overflow: hidden;
+         }
+         /* La barra de herramientas de desarrollo de Astro no debe salir en la captura. */
+         astro-dev-toolbar {
+            display: none !important;
+         }
+      </style>
+      <script is:inline>
+         // Chrome headless captura antes de que aplique el CSS del toolbar en
+         // algunos casos; se elimina el elemento en cuanto aparece.
+         const quitarToolbar = () => document.querySelectorAll('astro-dev-toolbar').forEach((el) => el.remove());
+         document.addEventListener('DOMContentLoaded', () => {
+            quitarToolbar();
+            new MutationObserver(quitarToolbar).observe(document.documentElement, { childList: true, subtree: true });
+         });
+      </script>
+   </head>
+   <body class="relative flex h-[630px] w-[1200px] items-center bg-bg text-text">
+      <div
+         class="pointer-events-none absolute inset-0"
+         style="background:
+            radial-gradient(700px 500px at 85% 30%, rgb(47 143 240 / 0.14), transparent 65%),
+            radial-gradient(600px 500px at 10% 100%, rgb(47 214 153 / 0.14), transparent 60%);"
+      >
+      </div>
+      <div class="relative flex items-center gap-14 px-24">
+         <Isotipo class="h-56 w-56 shrink-0" />
+         <div class="flex flex-col">
+            <span class="text-[44px] font-medium leading-none">bio</span>
+            <span class="-mt-2 text-[128px] font-semibold leading-none tracking-tight text-accent">altaris</span>
+            <span class="mt-5 text-[22px] font-medium uppercase tracking-[0.3em] text-muted">
+               Consultoría biofarmacéutica
+            </span>
+            <span class="mt-8 text-[24px] leading-snug text-muted">
+               Del laboratorio al expediente regulatorio · México
+            </span>
+         </div>
+      </div>
+   </body>
+</html>

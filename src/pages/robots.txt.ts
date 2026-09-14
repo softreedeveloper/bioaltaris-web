@@ -12,6 +12,9 @@ export const GET: APIRoute = ({ request }) => {
    const contenido = cfg.isProduction
       ? `User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /env-check.txt
+Disallow: /brand/
 
 Sitemap: ${base}/sitemap.xml
 `

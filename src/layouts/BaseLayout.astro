@@ -1,8 +1,9 @@
 ---
-import '@fontsource-variable/inter';
-import '@fontsource/lora/400.css';
-import '@fontsource/lora/600.css';
 import '@styles/global.css';
+// Solo el subset latin de Inter (48 KB): el paquete completo declara siete
+// @font-face que engordan el CSS inline de cada página. La misma variable
+// alimenta el preload y el @font-face, así el hash coincide siempre.
+import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 
 import { getSiteConfig, generateSEOTags } from '@utils/config';
 import { getPageEntry, getPageSchema } from '@utils/schema';
@@ -15,6 +16,7 @@ import MetaPixelScript from '@components/analytics/MetaPixelScript.astro';
 
 import Header from '@components/layout/Header.astro';
 import Footer from '@components/layout/Footer.astro';
+import WhatsAppButton from '@components/ui/WhatsAppButton.astro';
 
 interface Props {
    title?: string;
@@ -32,23 +34,28 @@ const { title, description, image, type, noIndex, publishedTime, modifiedTime, s
 
 const siteConfig = getSiteConfig(Astro.request);
 
-// La description de la prop manda; si no hay, la de PAGE_SCHEMA para esta
-// ruta; si tampoco, la del sitio.
+// Title y description: la prop manda; si no hay, lo de PAGE_SCHEMA para esta
+// ruta; si tampoco, lo del sitio.
 const pageEntry = getPageEntry(Astro.url.pathname);
+
+// Sin barra final: con trailingSlash 'never' es la única forma canónica.
+const rutaCanonica = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 const seoTags = generateSEOTags(
    {
-      title,
+      title: title ?? pageEntry?.title ?? undefined,
       description: description ?? pageEntry?.description ?? undefined,
       image,
       type,
       noIndex,
       publishedTime,
       modifiedTime,
-      url: new URL(Astro.url.pathname, siteConfig.canonicalUrl).href,
+      url: new URL(rutaCanonica, siteConfig.canonicalUrl).href,
    },
    Astro.request,
 );
+
+const fontFace = `@font-face{font-family:'Inter Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${interWoff2}) format('woff2-variations')}`;
 
 const pageSchema = schema ?? getPageSchema(Astro.url.pathname, Astro.request);
 const schemaJson = JSON.stringify(Array.isArray(pageSchema) ? pageSchema : [pageSchema]);
@@ -80,6 +87,9 @@ const sinTerceros = Astro.url.searchParams.get('minimal') === '1';
             document.documentElement.classList.add('js');
          })();
       </script>
+
+      <link rel="preload" href={interWoff2} as="font" type="font/woff2" crossorigin />
+      <style is:inline set:html={fontFace}></style>
 
       <title>{seoTags.title}</title>
       <meta name="description" content={seoTags.description} />
@@ -142,6 +152,7 @@ const sinTerceros = Astro.url.searchParams.get('minimal') === '1';
       </main>
 
       <Footer />
+      <WhatsAppButton />
 
       <!--
          Reveal on scroll.
@@ -199,10 +210,11 @@ const sinTerceros = Astro.url.searchParams.get('minimal') === '1';
       </script>
 
       <script>
-         import { initScrollDepth, initOutboundLinks } from '@utils/analytics';
+         import { initScrollDepth, initOutboundLinks, initWhatsAppLinks } from '@utils/analytics';
 
          initScrollDepth();
          initOutboundLinks();
+         initWhatsAppLinks();
       </script>
    </body>
 </html>

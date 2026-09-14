@@ -1,0 +1,269 @@
+---
+/**
+ * Fichas del equipo en una cuadrícula estática. Sustituye al carrusel de la
+ * primera versión, que el cliente descartó en la revisión de septiembre de
+ * 2026 por ser difícil de mover: con tres miembros, los tres caben a la vista.
+ *
+ * Ficha compacta: avatar circular, nombre, rol, separador, credenciales con
+ * icono y etiquetas tipo pill. La biografía no cabe en la ficha, así que vive
+ * en el modal que abre cada card (un <dialog> nativo, que ya trae cierre con
+ * Esc, captura de foco y fondo inerte sin necesidad de librería).
+ */
+import { Image } from 'astro:assets';
+import { EQUIPO } from '@constants/equipo';
+---
+
+<ul class="mt-12 grid gap-6 md:grid-cols-3" role="list">
+   {
+      EQUIPO.map((miembro, i) => (
+         <li
+            class="team-card panel relative flex flex-col p-7 transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-card"
+            data-reveal
+            data-reveal-delay={i * 100}
+         >
+            <span
+               class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-accent/25 bg-accent/10 text-2xl font-semibold text-accent"
+               aria-hidden="true"
+            >
+               {miembro.foto ? (
+                  <Image
+                     src={miembro.foto}
+                     alt=""
+                     width={224}
+                     height={224}
+                     densities={[1, 2]}
+                     loading="lazy"
+                     class="h-full w-full object-cover"
+                  />
+               ) : (
+                  miembro.iniciales
+               )}
+            </span>
+
+            <h3 class="mt-4 text-base font-semibold leading-snug">{miembro.nombre}</h3>
+            <p class="mt-2 text-[13px] text-muted">{miembro.area}</p>
+
+            <div class="my-4 h-px w-full bg-line" />
+
+            <ul class="flex flex-col gap-2">
+               {miembro.credenciales.map((credencial) => (
+                  <li class="flex items-start gap-2 text-[12px] leading-snug text-muted">
+                     <svg
+                        class="mt-px h-3.5 w-3.5 shrink-0 text-accent/60"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                        focusable="false"
+                     >
+                        <path d="M12 4 2 9l10 5 10-5zM6 11.5V17c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5" />
+                     </svg>
+                     <span>{credencial}</span>
+                  </li>
+               ))}
+            </ul>
+
+            <ul class="mt-4 flex flex-wrap gap-1.5">
+               {miembro.etiquetas.map((etiqueta) => (
+                  <li class="rounded-md border border-line px-2 py-[3px] text-[10px] uppercase tracking-wide text-muted">
+                     {etiqueta}
+                  </li>
+               ))}
+            </ul>
+
+            {/* El botón cubre la ficha entera: todo el card es clicable, pero
+                sigue habiendo un control real que se enfoca con el teclado y
+                se anuncia como botón. */}
+            <p class="mt-auto pt-5 text-[12px] font-semibold text-accent">Ver perfil →</p>
+            <button
+               type="button"
+               class="absolute inset-0 rounded-2xl"
+               data-abrir-perfil={`miembro-${i}`}
+               aria-label={`Ver el perfil completo de ${miembro.nombre}`}
+            />
+         </li>
+      ))
+   }
+</ul>
+
+{
+   EQUIPO.map((miembro, i) => (
+      <dialog class="team-modal" data-perfil={`miembro-${i}`} aria-labelledby={`perfil-${i}-nombre`}>
+         <article class="relative rounded-2xl border border-line bg-bg2 p-7 text-left shadow-card sm:p-9">
+            <button
+               type="button"
+               class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition hover:border-accent/50 hover:text-accent"
+               data-cerrar-perfil
+               aria-label="Cerrar"
+            >
+               <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                  focusable="false"
+               >
+                  <path d="M6 6l12 12M18 6L6 18" />
+               </svg>
+            </button>
+
+            <div class="flex items-center gap-4 pr-10">
+               <span
+                  class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-accent/25 bg-accent/10 text-xl font-semibold text-accent"
+                  aria-hidden={miembro.foto ? undefined : 'true'}
+               >
+                  {miembro.foto ? (
+                     <Image
+                        src={miembro.foto}
+                        alt={`Foto de ${miembro.nombre}`}
+                        width={128}
+                        height={128}
+                        densities={[1, 2]}
+                        loading="lazy"
+                        class="h-full w-full object-cover"
+                     />
+                  ) : (
+                     miembro.iniciales
+                  )}
+               </span>
+               <div>
+                  <h2 id={`perfil-${i}-nombre`} class="text-xl leading-snug">
+                     {miembro.nombre}
+                  </h2>
+                  <p class="mt-1 text-[11px] uppercase tracking-widest text-accent">{miembro.area}</p>
+               </div>
+            </div>
+
+            <h3 class="mt-7 text-[11px] uppercase tracking-widest text-muted">Formación</h3>
+            <ul class="mt-3 flex flex-col gap-2">
+               {miembro.credenciales.map((credencial) => (
+                  <li class="flex items-start gap-2 text-sm leading-relaxed">
+                     <svg
+                        class="mt-1 h-4 w-4 shrink-0 text-accent/70"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                        focusable="false"
+                     >
+                        <path d="M12 4 2 9l10 5 10-5zM6 11.5V17c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5" />
+                     </svg>
+                     <span>{credencial}</span>
+                  </li>
+               ))}
+            </ul>
+
+            <h3 class="mt-7 text-[11px] uppercase tracking-widest text-muted">Trayectoria</h3>
+            <p class="mt-3 text-sm leading-relaxed text-muted">{miembro.bio}</p>
+
+            <ul class="mt-7 flex flex-wrap gap-1.5">
+               {miembro.etiquetas.map((etiqueta) => (
+                  <li class="rounded-md border border-line px-2.5 py-1 text-[10px] uppercase tracking-wide text-muted">
+                     {etiqueta}
+                  </li>
+               ))}
+            </ul>
+         </article>
+      </dialog>
+   ))
+}
+
+<style>
+   /* El botón cubre el card entero, así que su propio aro de foco ya rodea la
+      ficha; solo hay que redondearlo igual que ella (la regla global de
+      :focus-visible lo deja en 2px). */
+   .team-card button:focus-visible {
+      border-radius: 1rem;
+   }
+
+   /*
+      Ojo con poner utilidades de display (flex, grid) en el propio <dialog>:
+      sobreescriben el `display: none` que le da el navegador cuando está
+      cerrado y el modal se quedaría visible siempre. El layout va dentro.
+   */
+   .team-modal {
+      width: min(560px, calc(100vw - 2rem));
+      max-height: calc(100svh - 3rem);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgb(var(--text));
+      overflow: visible;
+   }
+
+   .team-modal::backdrop {
+      background: rgb(6 12 20 / 0.7);
+      backdrop-filter: blur(4px);
+   }
+
+   .team-modal > article {
+      max-height: calc(100svh - 3rem);
+      overflow-y: auto;
+   }
+
+   .team-modal[open] {
+      animation: teamModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+   }
+
+   .team-modal[open]::backdrop {
+      animation: teamModalFondo 0.25s ease;
+   }
+
+   @keyframes teamModalIn {
+      from {
+         opacity: 0;
+         transform: translateY(12px) scale(0.98);
+      }
+   }
+
+   @keyframes teamModalFondo {
+      from {
+         opacity: 0;
+      }
+   }
+</style>
+
+<script>
+   const initModales = () => {
+      document.querySelectorAll<HTMLButtonElement>('[data-abrir-perfil]').forEach((boton) => {
+         if (boton.dataset.iniciado === 'true') return;
+         boton.dataset.iniciado = 'true';
+
+         boton.addEventListener('click', () => {
+            const id = boton.dataset.abrirPerfil;
+            const modal = document.querySelector<HTMLDialogElement>(`[data-perfil="${id}"]`);
+            if (!modal) return;
+
+            // showModal() no existe en navegadores muy antiguos; ahí el
+            // contenido no es un modal pero sigue siendo visible y legible.
+            if (typeof modal.showModal === 'function') modal.showModal();
+            else modal.setAttribute('open', '');
+         });
+      });
+
+      document.querySelectorAll<HTMLDialogElement>('.team-modal').forEach((modal) => {
+         if (modal.dataset.iniciado === 'true') return;
+         modal.dataset.iniciado = 'true';
+
+         modal.querySelector('[data-cerrar-perfil]')?.addEventListener('click', () => modal.close());
+
+         // Clic en el fondo: el <article> ocupa toda la caja del diálogo, así
+         // que si el evento cae en el propio <dialog> es que fue fuera.
+         modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.close();
+         });
+      });
+   };
+
+   initModales();
+   document.addEventListener('astro:page-load', initModales);
+</script>

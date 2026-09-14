@@ -15,7 +15,11 @@ declare global {
       dataLayer: Record<string, unknown>[];
       fbq?: (...args: unknown[]) => void;
       metaPixel?: {
-         track: (event: string, customData?: Record<string, unknown>, userData?: Record<string, unknown>) => Promise<unknown>;
+         track: (
+            event: string,
+            customData?: Record<string, unknown>,
+            userData?: Record<string, unknown>,
+         ) => Promise<unknown>;
          trackPageView: (customData?: Record<string, unknown>) => Promise<unknown>;
       };
       metaPixelUtils?: {
@@ -55,6 +59,24 @@ export function trackMeta(
 /** Clic en un CTA. `location` identifica desde qué sección se convirtió. */
 export function trackCta(location: string, label: string): void {
    pushEvent('cta_iniciar_proyecto', { cta_location: location, cta_label: label });
+}
+
+/**
+ * Clics en cualquier enlace de WhatsApp (`data-whatsapp="<ubicación>"`). Se
+ * miden como lead igual que el CTA de contacto: el que abre el chat ya
+ * convirtió aunque no llene el formulario.
+ */
+export function initWhatsAppLinks(): void {
+   if (typeof window === 'undefined') return;
+
+   document.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement | null)?.closest?.<HTMLAnchorElement>('a[data-whatsapp]');
+      if (!link) return;
+
+      const location = link.dataset.whatsapp || 'desconocido';
+      pushEvent('contacto_whatsapp', { cta_location: location });
+      trackMeta('Contact', { content_name: `WhatsApp ${location}`, content_category: 'lead_generation' });
+   });
 }
 
 /**

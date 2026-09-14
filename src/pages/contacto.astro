@@ -11,7 +11,7 @@ const enviado = Astro.url.searchParams.get('enviado') === '1';
 const error = Astro.url.searchParams.get('error');
 ---
 
-<BaseLayout title="Contacto | BioAltaris">
+<BaseLayout>
    <section class="container-site pb-section pt-10 lg:pt-14">
       <Breadcrumbs />
 
@@ -55,6 +55,21 @@ const error = Astro.url.searchParams.get('error');
                      </dd>
                   </div>
 
+                  <div>
+                     <dt class="text-[11px] uppercase tracking-widest text-muted">WhatsApp</dt>
+                     <dd class="mt-1.5">
+                        <a
+                           href={cfg.whatsappUrl}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           data-whatsapp="contacto_datos"
+                           class="text-accent transition hover:underline"
+                        >
+                           {cfg.contact.whatsappDisplay}
+                        </a>
+                     </dd>
+                  </div>
+
                   {
                      cfg.contact.address && (
                         <div>
@@ -79,15 +94,15 @@ const error = Astro.url.searchParams.get('error');
                <h2 class="text-sm font-semibold">Qué pasa después</h2>
                <ol class="mt-4 flex flex-col gap-3 text-sm text-muted">
                   <li class="flex gap-3">
-                     <span class="font-serif text-accent">1</span>
+                     <span class="font-semibold tabular-nums text-accent">1</span>
                      Revisamos tu reto y lo asignamos al asesor con el perfil adecuado.
                   </li>
                   <li class="flex gap-3">
-                     <span class="font-serif text-accent">2</span>
+                     <span class="font-semibold tabular-nums text-accent">2</span>
                      Te contactamos para entender el contexto y el punto de partida.
                   </li>
                   <li class="flex gap-3">
-                     <span class="font-serif text-accent">3</span>
+                     <span class="font-semibold tabular-nums text-accent">3</span>
                      Proponemos el alcance y la ruta, con los servicios que aplican.
                   </li>
                </ol>

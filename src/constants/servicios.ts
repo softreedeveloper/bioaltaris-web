@@ -6,10 +6,11 @@
  * enlaces del footer. En los mockups originales estaban escritos a mano en el
  * HTML, lo que hacía imposible generar las páginas de detalle.
  *
- * `resumen` y `alcance` son textuales de la documentación de marca. `detalle`
- * amplía el resumen con la variante de copy de la maqueta "constelación"
- * cuando el servicio aparecía en ambas; no introduce afirmaciones técnicas
- * que no estuvieran en la fuente.
+ * `resumen` y `alcance` son textuales de la documentación de marca, con los
+ * ajustes de copy de la maqueta "Elige la etapa de tu desarrollo" (revisión de
+ * septiembre de 2026). `detalle` amplía el resumen con la variante de copy de
+ * la maqueta "constelación" cuando el servicio aparecía en ambas; no introduce
+ * afirmaciones técnicas que no estuvieran en la fuente.
  */
 
 export type CategoriaId = 'evaluacion-preclinica' | 'caracterizacion-analitica' | 'estrategia-desarrollo';
@@ -19,8 +20,6 @@ export interface Categoria {
    numero: string;
    nombre: string;
    lema: string;
-   /** Texto del CTA de las tarjetas de esta categoría, según los mockups. */
-   cta: string;
    descripcion: string;
 }
 
@@ -49,7 +48,15 @@ export type IconName =
    | 'folder'
    | 'target'
    | 'search'
-   | 'scroll';
+   | 'scroll'
+   | 'clipboard'
+   | 'atom';
+
+/**
+ * Última revisión del copy del catálogo (sitemap `lastmod` de /servicios y
+ * sus fichas). Actualizar a mano cuando cambie el contenido.
+ */
+export const ACTUALIZADO = '2026-09-14';
 
 export const CATEGORIAS: Categoria[] = [
    {
@@ -57,27 +64,22 @@ export const CATEGORIAS: Categoria[] = [
       numero: '01',
       nombre: 'Evaluación preclínica',
       lema: 'Evidencia biológica defendible',
-      cta: 'Ver metodología',
       descripcion:
-         'Generamos el paquete de evidencia biológica que sostiene tu candidato: potencia, seguridad y comportamiento en modelos animales, con criterios de aceptación definidos antes de empezar.',
+         'Te ayudamos a diseñar e implementar los estudios que demuestran la potencia, la seguridad y el comportamiento de tu candidato.',
    },
    {
       id: 'caracterizacion-analitica',
       numero: '02',
       nombre: 'Caracterización analítica',
       lema: 'Producto y atributos críticos',
-      cta: 'Explorar análisis',
-      descripcion:
-         'Definimos qué es exactamente tu producto y qué atributos determinan su calidad, para que el expediente hable de una molécula caracterizada y no de una promesa.',
+      descripcion: 'Definimos qué es exactamente tu producto y qué atributos determinan su calidad.',
    },
    {
       id: 'estrategia-desarrollo',
       numero: '03',
       nombre: 'Estrategia y desarrollo',
-      lema: 'De la ciencia al activo protegido',
-      cta: 'Ver consultoría',
-      descripcion:
-         'Convertimos los resultados en un expediente sometible y en propiedad intelectual defendible, identificando los huecos antes de que los encuentre la autoridad.',
+      lema: 'Regulación y propiedad intelectual',
+      descripcion: 'Ordenamos la evidencia, anticipamos riesgos y te apoyamos a proteger tu invención.',
    },
 ];
 
@@ -130,7 +132,7 @@ export const SERVICIOS: Servicio[] = [
       tag: 'Cinética',
       acento: 'verde',
       icono: 'chart',
-      resumen: 'Perfiles completos de distribución, metabolismo y excreción en modelos animales.',
+      resumen: 'Diseño de estudios de distribución, metabolismo y excreción en modelos animales.',
       detalle:
          'Determinamos cómo se distribuye, metaboliza y excreta la molécula en modelos animales, incluyendo el marcaje necesario para seguirla. Es la evidencia que conecta la dosis administrada con el efecto observado.',
       alcance: ['Marcaje de moléculas', 'Farmacocinética y farmacodinamia (PK/PD)'],
@@ -144,7 +146,8 @@ export const SERVICIOS: Servicio[] = [
       tag: 'Calidad',
       acento: 'verde',
       icono: 'flask',
-      resumen: 'Análisis integral del producto biológico y determinación de sus atributos críticos.',
+      resumen:
+         'Planeación del análisis integral de tu producto biológico para definir sus atributos críticos de calidad.',
       detalle:
          'Analizamos el producto biológico de forma integral —pureza, impurezas y actividad biológica específica— para identificar sus atributos críticos de calidad (CQA). Sin esa definición, el control de calidad posterior no tiene contra qué compararse.',
       alcance: [
@@ -203,10 +206,10 @@ export const SERVICIOS: Servicio[] = [
       tag: 'Regulatorio',
       acento: 'verde',
       icono: 'folder',
-      resumen: 'Armado estratégico y estructuración técnica del expediente para sometimiento.',
+      resumen: 'Acompañamiento en la estructuración técnica del expediente para sometimiento.',
       detalle:
          'Estructuramos el expediente técnico para sometimiento y revisamos qué falta antes de entregarlo. El objetivo es llegar a la autoridad sin huecos preclínicos evidentes, alineados con los requisitos de la agencia que corresponda.',
-      alcance: ['Alineación con requisitos de autoridades sanitarias', 'Revisión de gaps preclínicos'],
+      alcance: ['Alineación con requisitos sanitarios', 'Revisión de brechas preclínicas'],
    },
    {
       slug: 'evaluacion-trl',

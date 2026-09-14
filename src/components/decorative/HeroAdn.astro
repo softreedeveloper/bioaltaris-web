@@ -1,0 +1,201 @@
+---
+/**
+ * Doble hélice de ADN de fondo para el hero en escritorio, como en el mock
+ * aprobado. Se dibuja en SVG en vez de usar la foto del mock, que no existe
+ * como asset: pesa unos KB, hereda los tokens de color y no pixela.
+ *
+ * Para que se lea como una hélice y no como dos ondas planas, cada punto
+ * lleva "profundidad": la hebra que pasa por delante se dibuja más grande,
+ * más brillante y con halo; la que va por detrás, pequeña, tenue y algo
+ * desenfocada. Los peldaños son pares de bases (puntos entre hebras) y
+ * alrededor flotan partículas bokeh como en la imagen de referencia.
+ *
+ * Es decorativa (`aria-hidden`), va detrás del contenido con `pointer-events:
+ * none` y solo se muestra desde `xl`, a la derecha del orbital, sin pisarlo.
+ */
+const ANCHO = 420;
+const ALTO = 1000;
+const CENTRO_X = ANCHO / 2;
+const AMPLITUD = 110;
+const PASOS = 140;
+const PERIODO = 400; // px por vuelta completa
+
+/** PRNG determinista: el mismo dibujo en cada render (sin diffs de hidratación). */
+let semilla = 7;
+const azar = () => {
+   semilla = (semilla * 16807) % 2147483647;
+   return (semilla - 1) / 2147483646;
+};
+
+interface Punto {
+   x: number;
+   y: number;
+   /** 0 = al fondo, 1 = al frente. */
+   prof: number;
+}
+
+const hebra = (desfase: number): Punto[] =>
+   Array.from({ length: PASOS }, (_, i) => {
+      const y = (i / (PASOS - 1)) * ALTO;
+      const fase = (y / PERIODO) * Math.PI * 2 + desfase;
+      return { x: CENTRO_X + Math.sin(fase) * AMPLITUD, y, prof: (Math.cos(fase) + 1) / 2 };
+   });
+
+const hebraA = hebra(0);
+const hebraB = hebra(Math.PI);
+
+/** Peldaños: cada N pasos, cinco pares de bases entre las dos hebras. */
+const peldanos = hebraA
+   .map((a, i) => ({ a, b: hebraB[i], i }))
+   .filter(({ i }) => i % 5 === 2)
+   .map(({ a, b }) => ({
+      prof: (a.prof + b.prof) / 2,
+      bases: Array.from({ length: 5 }, (_, k) => {
+         const t = (k + 0.5) / 5;
+         return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, r: 1.4 + (a.prof + b.prof) * 0.6 };
+      }),
+   }));
+
+/** Partículas bokeh: pocas, grandes y muy difusas, más densas cerca de la hélice. */
+const bokeh = Array.from({ length: 34 }, () => ({
+   x: CENTRO_X + (azar() - 0.5) * ANCHO * 1.4,
+   y: azar() * ALTO,
+   r: 3 + azar() * 14,
+   o: 0.08 + azar() * 0.25,
+   azul: azar() > 0.55,
+}));
+
+const radio = (p: Punto) => 1.6 + p.prof * 3.2;
+const opacidad = (p: Punto) => 0.25 + p.prof * 0.75;
+
+// Los filtros van aquí y no en el template: el compilador de Astro confunde
+// un `<=` dentro de una expresión JSX con el inicio de una etiqueta.
+const alFrente = (p: Punto) => p.prof > 0.5;
+const alFondo = (p: Punto) => !alFrente(p);
+const conHalo = [...hebraA, ...hebraB].filter((p) => p.prof > 0.55);
+const fondoA = hebraA.filter(alFondo);
+const fondoB = hebraB.filter(alFondo);
+const frenteA = hebraA.filter(alFrente);
+const frenteB = hebraB.filter(alFrente);
+---
+
+<div
+   class="hero-adn pointer-events-none absolute inset-y-0 -right-[3%] hidden w-[22%] xl:block 2xl:w-[20%]"
+   aria-hidden="true"
+>
+   <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} preserveAspectRatio="xMidYMid slice" class="h-full w-full">
+      <defs>
+         <linearGradient id="adn-verde" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgb(var(--accent))"></stop>
+            <stop offset="0.5" stop-color="#7CF5D2"></stop>
+            <stop offset="1" stop-color="rgb(var(--accent))"></stop>
+         </linearGradient>
+         <linearGradient id="adn-azul" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgb(var(--accent-2))"></stop>
+            <stop offset="0.5" stop-color="#8FD3FF"></stop>
+            <stop offset="1" stop-color="rgb(var(--accent-2))"></stop>
+         </linearGradient>
+         <filter id="adn-halo" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+         </filter>
+         <filter id="adn-fondo" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.2"></feGaussianBlur>
+         </filter>
+         <filter id="adn-bokeh" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="5"></feGaussianBlur>
+         </filter>
+      </defs>
+
+      <g class="hero-adn-helice">
+         {/* Bokeh ambiente */}
+         <g filter="url(#adn-bokeh)">
+            {
+               bokeh.map((b) => (
+                  <circle
+                     cx={b.x}
+                     cy={b.y}
+                     r={b.r}
+                     fill={b.azul ? 'url(#adn-azul)' : 'url(#adn-verde)'}
+                     fill-opacity={b.o}
+                  />
+               ))
+            }
+         </g>
+
+         {/* Halo de las hebras: solo los puntos que están al frente brillan */}
+         <g filter="url(#adn-halo)">
+            {
+               conHalo.map((p) => (
+                  <circle cx={p.x} cy={p.y} r={radio(p) * 2.2} fill="url(#adn-verde)" fill-opacity={p.prof * 0.55} />
+               ))
+            }
+         </g>
+
+         {/* Hebra y peldaños al fondo (desenfocados) */}
+         <g filter="url(#adn-fondo)">
+            {
+               fondoA.map((p) => (
+                  <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-verde)" fill-opacity={opacidad(p)} />
+               ))
+            }
+            {
+               fondoB.map((p) => (
+                  <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-azul)" fill-opacity={opacidad(p)} />
+               ))
+            }
+         </g>
+
+         {/* Pares de bases */}
+         {
+            peldanos.map((pl) => (
+               <g fill-opacity={0.3 + pl.prof * 0.5}>
+                  {pl.bases.map((b, k) => (
+                     <circle cx={b.x} cy={b.y} r={b.r} fill={k % 2 === 0 ? 'url(#adn-verde)' : 'url(#adn-azul)'} />
+                  ))}
+               </g>
+            ))
+         }
+
+         {/* Hebras al frente (nítidas) */}
+         {
+            frenteA.map((p) => (
+               <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-verde)" fill-opacity={opacidad(p)} />
+            ))
+         }
+         {
+            frenteB.map((p) => (
+               <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-azul)" fill-opacity={opacidad(p)} />
+            ))
+         }
+      </g>
+   </svg>
+</div>
+
+<style>
+   .hero-adn {
+      /* Se funde con el fondo por los bordes para que no se vea el recorte. */
+      mask-image: linear-gradient(90deg, transparent 0%, #000 45%, #000 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%, #000 100%);
+      opacity: 0.85;
+   }
+
+   html:not(.dark) .hero-adn {
+      opacity: 0.4;
+   }
+
+   .hero-adn-helice {
+      transform-origin: 50% 50%;
+      transform: rotate(14deg) translate(20px, 0);
+      animation: heroAdnFlota 16s ease-in-out infinite;
+   }
+
+   @keyframes heroAdnFlota {
+      0%,
+      100% {
+         transform: rotate(14deg) translate(20px, 0);
+      }
+      50% {
+         transform: rotate(14deg) translate(20px, -20px);
+      }
+   }
+</style>

@@ -1,24 +1,39 @@
 ---
 /**
- * Logotipo. Es tipográfico ("Bio" en peso fuerte + "Altaris" en el verde de
- * marca, ambos en serif), así que se compone con texto en vez de un PNG: pesa
- * cero bytes extra, escala sin pixelarse y cambia de tema solo.
+ * Logotipo: isotipo + wordmark en dos líneas ("bio" pequeño sobre "altaris"
+ * en el verde de marca) + tagline. Se compone con SVG inline y texto en Inter:
+ * pesa cero bytes extra, escala sin pixelarse y cambia de tema solo.
  */
+import Isotipo from './Isotipo.astro';
+
 interface Props {
    class?: string;
    /** El logo del header es un enlace; el del footer, no. */
    href?: string | null;
+   /** Sin tagline (menú móvil, espacios estrechos). */
+   compacto?: boolean;
 }
 
-const { class: className = '', href = '/' } = Astro.props;
+const { class: className = '', href = '/', compacto = false } = Astro.props;
 
 const Tag = href ? 'a' : 'span';
 ---
 
 <Tag
    {...href ? { href } : {}}
-   class:list={['font-serif text-xl tracking-tight text-text sm:text-2xl', className]}
+   class:list={['inline-flex items-center gap-2.5 text-text', className]}
    aria-label="BioAltaris — Inicio"
 >
-   <span class="font-semibold">Bio</span><span class="text-accent">Altaris</span>
+   <Isotipo class="h-9 w-9 shrink-0 lg:h-10 lg:w-10" />
+   <span class="flex flex-col leading-none">
+      <span class="text-[11px] font-medium tracking-[0.02em]">bio</span>
+      <span class="-mt-px text-[22px] font-semibold tracking-tight text-accent">altaris</span>
+      {
+         !compacto && (
+            <span class="mt-1 hidden text-[7.5px] font-medium uppercase tracking-[0.22em] text-muted sm:block">
+               Consultoría biofarmacéutica
+            </span>
+         )
+      }
+   </span>
 </Tag>

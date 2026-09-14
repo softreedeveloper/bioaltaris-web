@@ -7,10 +7,7 @@ const path = Astro.url.pathname;
 const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
-<header
-   id="siteHeader"
-   class="sticky top-0 z-50 border-b border-line/70 bg-bg/80 backdrop-blur-md transition-colors"
->
+<header id="siteHeader" class="sticky top-0 z-50 border-b border-line/70 bg-bg/80 backdrop-blur-md transition-colors">
    <div class="container-wide flex h-16 items-center justify-between gap-4 lg:h-20">
       <Logo />
 
@@ -45,6 +42,7 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
             class="btn-primary hidden !px-5 !py-2.5 text-[13px] sm:inline-flex"
          >
             {CTA_PRINCIPAL.label}
+            <span aria-hidden="true">→</span>
          </a>
 
          <button
@@ -55,7 +53,14 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
             aria-expanded="false"
             aria-controls="menuMovil"
          >
-            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <svg
+               class="h-6 w-6"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.6"
+               stroke-linecap="round"
+            >
                <path d="M4 7h16M4 12h16M4 17h16"></path>
             </svg>
          </button>
@@ -63,12 +68,14 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
    </div>
 </header>
 
-{/*
+{
+   /*
    El panel se renderiza FUERA de <header> a propósito: el header lleva
    `backdrop-filter`, y un ancestro con backdrop-filter crea un bloque
    contenedor que rompe `position: fixed` en sus descendientes — el panel
    quedaría del alto del header en vez de ocupar la pantalla.
-*/}
+*/
+}
 <div
    id="menuMovil"
    class="invisible fixed inset-0 z-[60] opacity-0 transition-opacity duration-200 lg:hidden"
@@ -81,7 +88,7 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
       class="absolute inset-x-0 bottom-0 top-0 flex translate-y-4 flex-col bg-bg2 transition-transform duration-300 ease-out"
    >
       <div class="container-site flex h-16 shrink-0 items-center justify-between border-b border-line">
-         <Logo />
+         <Logo compacto />
          <div class="flex items-center gap-1">
             <ThemeToggle />
             <button
@@ -90,7 +97,14 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
                aria-label="Cerrar menú"
                data-menu-cerrar
             >
-               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+               <svg
+                  class="h-6 w-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+               >
                   <path d="M6 6l12 12M18 6L6 18"></path>
                </svg>
             </button>
@@ -106,7 +120,7 @@ const esActivo = (href: string) => path === href || path.startsWith(`${href}/`);
                         href={link.href}
                         aria-current={esActivo(link.href) ? 'page' : undefined}
                         class:list={[
-                           'flex min-h-[56px] items-center border-b border-line/60 font-serif text-2xl transition',
+                           'flex min-h-[56px] items-center border-b border-line/60 text-2xl font-medium transition',
                            esActivo(link.href) ? 'text-accent' : 'text-text hover:text-accent',
                         ]}
                      >

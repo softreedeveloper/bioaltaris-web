@@ -19,7 +19,7 @@ const fechaLegible = fecha.toLocaleDateString('es-MX', { year: 'numeric', month:
    data-reveal-delay={delay}
 >
    <div class="flex flex-wrap items-center gap-2">
-      <time datetime={fechaISO} class="font-serif text-sm text-accent">{fecha.getFullYear()}</time>
+      <time datetime={fechaISO} class="text-sm font-semibold tabular-nums text-accent">{fecha.getFullYear()}</time>
       {
          categorias.map((cat) => (
             <span class="rounded-full border border-line px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
