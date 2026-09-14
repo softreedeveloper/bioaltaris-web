@@ -29,6 +29,10 @@ export default defineConfig({
    output: 'server',
    adapter: netlify(),
 
+   // 'never': /servicios/ y /servicios serían dos URLs con el mismo contenido.
+   // En SSR Astro responde 301 a la variante con barra final antes de enrutar.
+   trailingSlash: 'never',
+
    // 'always': evita que Astro extraiga los <style> con scope de componente a
    // archivos _astro/*.css enlazados aparte, que Lighthouse marca como
    // solicitudes de bloqueo de renderización.

@@ -122,6 +122,20 @@ RGB para que los modificadores de opacidad de Tailwind (`bg-panel/50`) sigan
 funcionando. El verde de marca se oscurece en el tema claro porque `#2FD699` sobre
 blanco da 1.6:1; todos los pares de color pasan AA en ambos temas.
 
+## Marca
+
+El logotipo es `src/components/layout/Logo.astro` (isotipo SVG inline en
+`Isotipo.astro` + wordmark en Inter); no hay archivo vectorial externo. Los
+PNG de `public/` se generan desde `public/favicon.svg`:
+
+```bash
+node scripts/brand/generar-assets.mjs   # apple-touch-icon.png y brand/bioaltaris-logo-512.png
+```
+
+La imagen Open Graph (`public/og/bioaltaris-og.png`) se captura de la página
+de desarrollo `/brand/og` (404 en producción) con Chrome headless; el comando
+exacto está en la cabecera del script.
+
 ## SEO
 
 - Canonical y `robots` se resuelven **por hostname en runtime**: un mismo build

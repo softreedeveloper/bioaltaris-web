@@ -13,7 +13,7 @@ const cfg = getSiteConfig(Astro.request);
  */
 ---
 
-<BaseLayout title="Aviso de privacidad | BioAltaris">
+<BaseLayout>
    <article class="container-site pb-section pt-10 lg:pt-14">
       <Breadcrumbs />
 
@@ -25,8 +25,8 @@ const cfg = getSiteConfig(Astro.request);
       <div class="prosa mx-auto mt-10 max-w-3xl">
          <h2>Responsable del tratamiento</h2>
          <p>
-            {cfg.business.legalName} es responsable del tratamiento de los datos personales que nos proporciones a
-            través de este sitio. Puedes contactarnos en <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a>.
+            {cfg.business.legalName} es responsable del tratamiento de los datos personales que nos proporciones a través
+            de este sitio. Puedes contactarnos en <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a>.
          </p>
 
          <h2>Datos que recabamos</h2>
@@ -73,9 +73,9 @@ const cfg = getSiteConfig(Astro.request);
          <p>
             Tienes derecho a acceder, rectificar y cancelar tus datos personales, así como a oponerte a su tratamiento y
             a revocar el consentimiento que nos hayas otorgado. Para ejercerlos, escríbenos a
-            <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a> indicando tu nombre, el derecho que deseas
-            ejercer y un medio para contactarte. Responderemos en los plazos que marca la Ley Federal de Protección de
-            Datos Personales en Posesión de los Particulares.
+            <a href={`mailto:${cfg.contact.email}`}>{cfg.contact.email}</a> indicando tu nombre, el derecho que deseas ejercer
+            y un medio para contactarte. Responderemos en los plazos que marca la Ley Federal de Protección de Datos Personales
+            en Posesión de los Particulares.
          </p>
 
          <h2>Cambios a este aviso</h2>

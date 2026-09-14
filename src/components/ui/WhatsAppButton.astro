@@ -1,0 +1,89 @@
+---
+/**
+ * Botón flotante de WhatsApp, presente en todas las páginas desde BaseLayout.
+ *
+ * Va con los tokens del sitio (panel translúcido, borde de línea, acento de
+ * marca) y no con el verde corporativo de WhatsApp, para que se lea como
+ * parte de la interfaz y no como un widget pegado encima. En móvil queda solo
+ * el disco con el icono; desde `sm` se despliega la etiqueta.
+ *
+ * El número y el mensaje inicial viven en config.ts.
+ */
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { getSiteConfig } from '@utils/config';
+
+const cfg = getSiteConfig(Astro.request);
+---
+
+<a
+   href={cfg.whatsappUrl}
+   target="_blank"
+   rel="noopener noreferrer"
+   data-whatsapp="flotante"
+   class="whatsapp-fab group fixed bottom-5 right-5 z-40 flex items-center gap-3 rounded-full border border-line bg-bg2/80 p-1.5 shadow-card backdrop-blur-md transition duration-300 hover:border-accent/60 hover:shadow-glow sm:bottom-6 sm:right-6 sm:pr-5"
+   aria-label={`Escríbenos por WhatsApp al ${cfg.contact.whatsappDisplay}`}
+>
+   <span
+      class="whatsapp-fab-icono relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-[#06121F]"
+   >
+      <WhatsAppIcon class="h-[22px] w-[22px]" />
+      {/* Punto de "disponible", con el halo del acento */}
+      <span class="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-bg2 bg-accent" aria-hidden="true"
+      ></span>
+   </span>
+
+   <span class="hidden flex-col leading-tight sm:flex">
+      <span class="text-[10px] font-semibold uppercase tracking-eyebrow text-accent">WhatsApp</span>
+      <span class="mt-0.5 text-sm font-medium text-text transition group-hover:text-accent">Escríbenos</span>
+   </span>
+</a>
+
+<style>
+   /* Halo que respira tres veces al cargar y después se apaga: llama la
+      atención sin quedarse parpadeando toda la sesión. */
+   .whatsapp-fab-icono::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      box-shadow: 0 0 0 0 rgb(var(--accent) / 0.5);
+      animation: whatsappPulso 2.6s ease-out 1.2s 3;
+      pointer-events: none;
+   }
+
+   @keyframes whatsappPulso {
+      0% {
+         box-shadow: 0 0 0 0 rgb(var(--accent) / 0.5);
+      }
+      70% {
+         box-shadow: 0 0 0 12px rgb(var(--accent) / 0);
+      }
+      100% {
+         box-shadow: 0 0 0 0 rgb(var(--accent) / 0);
+      }
+   }
+
+   /* Mismo criterio que .btn-primary: en light el verde de marca se oscurece
+      y el icono pasa a blanco para conservar el contraste. */
+   html:not(.dark) .whatsapp-fab {
+      background-color: rgb(var(--bg-2));
+      box-shadow:
+         0 2px 8px rgb(12 21 38 / 0.06),
+         0 14px 40px rgb(12 21 38 / 0.1);
+   }
+
+   html:not(.dark) .whatsapp-fab-icono {
+      color: #fff;
+   }
+
+   .whatsapp-fab:focus-visible {
+      outline-offset: 4px;
+      border-radius: 999px;
+   }
+
+   @media (prefers-reduced-motion: reduce) {
+      .whatsapp-fab-icono::before {
+         animation: none;
+      }
+   }
+</style>

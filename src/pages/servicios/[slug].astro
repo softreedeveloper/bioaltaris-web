@@ -3,20 +3,22 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import Icon from '@components/ui/Icon.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
-import { SERVICIOS, getCategoria, serviciosPorCategoria } from '@constants/servicios';
+import { CTA_PRINCIPAL } from '@constants/navegacion';
+import { getServicio, getCategoria, serviciosPorCategoria } from '@constants/servicios';
 import { generateServiceSchema, generateBreadcrumbSchema } from '@utils/schema';
+import { recortar } from '@utils/config';
 
-export const prerender = true;
+// On-demand como el resto del sitio: prerenderizar fijaba el canonical y el
+// og:url con el hostname del build en vez del de la petición.
+const servicio = getServicio(Astro.params.slug ?? '');
+if (!servicio) return Astro.rewrite('/404');
 
-export function getStaticPaths() {
-   return SERVICIOS.map((servicio) => ({
-      params: { slug: servicio.slug },
-      props: { servicio },
-   }));
-}
-
-const { servicio } = Astro.props;
 const categoria = getCategoria(servicio.categoria);
+const seoTitle = `${servicio.titulo} en México | BioAltaris`;
+const seoDescription = recortar(
+   `${servicio.resumen} Servicio de ${categoria.nombre.toLowerCase()} de BioAltaris en México. Solicita una propuesta.`,
+   160,
+);
 const relacionados = serviciosPorCategoria(servicio.categoria).filter((s) => s.slug !== servicio.slug);
 const acento = servicio.acento === 'azul' ? 'text-accent2' : 'text-accent';
 
@@ -32,23 +34,18 @@ const schema = [
 ];
 ---
 
-<BaseLayout
-   title={`${servicio.titulo} | Servicios BioAltaris`}
-   description={servicio.resumen}
-   type="article"
-   schema={schema}
->
+<BaseLayout title={seoTitle} description={seoDescription} type="article" schema={schema}>
    <article>
       <header class="container-site pb-10 pt-10 lg:pt-14">
-         <Breadcrumbs
-            items={[
-               { name: 'Servicios', href: '/servicios' },
-               { name: servicio.titulo },
-            ]}
-         />
+         <Breadcrumbs items={[{ name: 'Servicios', href: '/servicios' }, { name: servicio.titulo }]} />
 
          <div class="mt-8 flex flex-wrap items-center gap-3">
-            <span class:list={['flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-bg2/60', acento]}>
+            <span
+               class:list={[
+                  'flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-bg2/60',
+                  acento,
+               ]}
+            >
                <Icon name={servicio.icono} class="h-6 w-6" />
             </span>
             <span
@@ -119,7 +116,7 @@ const schema = [
                   data-cta="servicio_detalle"
                   class="btn-primary mt-6 w-full"
                >
-                  Iniciar proyecto
+                  {CTA_PRINCIPAL.label}
                </a>
             </div>
 

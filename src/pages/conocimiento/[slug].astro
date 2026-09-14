@@ -1,21 +1,15 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
 import { generateArticleSchema, generateBreadcrumbSchema } from '@utils/schema';
+import { recortar } from '@utils/config';
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-   const entradas = await getCollection('conocimiento', ({ data }) => !data.borrador);
-   return entradas.map((entrada) => ({
-      params: { slug: entrada.id },
-      props: { entrada },
-   }));
-}
-
-const { entrada } = Astro.props;
+// On-demand como el resto del sitio: prerenderizar fijaba el canonical y el
+// og:url con el hostname del build en vez del de la petición.
+const entrada = await getEntry('conocimiento', Astro.params.slug ?? '');
+if (!entrada || entrada.data.borrador) return Astro.rewrite('/404');
 const { Content } = await render(entrada);
 const { titulo, resumen, fecha, fuente, categorias } = entrada.data;
 
@@ -38,7 +32,13 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={`${titulo} | BioAltaris`} description={resumen} type="article" publishedTime={fechaISO} schema={schema}>
+<BaseLayout
+   title={`${recortar(titulo, 60)} | BioAltaris`}
+   description={recortar(resumen, 160)}
+   type="article"
+   publishedTime={fechaISO}
+   schema={schema}
+>
    <article class="container-site pb-section pt-10 lg:pt-14">
       <Breadcrumbs items={[{ name: 'Conocimiento', href: '/conocimiento' }, { name: titulo }]} />
 

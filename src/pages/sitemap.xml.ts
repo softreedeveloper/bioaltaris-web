@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { getSiteConfig } from '@utils/config';
-import { SERVICIOS } from '@constants/servicios';
+import { SERVICIOS, ACTUALIZADO } from '@constants/servicios';
 
 /**
  * Sitemap generado desde las mismas fuentes que renderizan las páginas: el
@@ -16,12 +16,14 @@ interface Entrada {
    lastmod?: string;
 }
 
+// `lastmod` de las estáticas: fecha de la última revisión de contenido de
+// cada página, mantenida a mano (un timestamp de build mentiría).
 const ESTATICAS: Entrada[] = [
-   { path: '/', changefreq: 'monthly', priority: '1.0' },
-   { path: '/servicios', changefreq: 'monthly', priority: '0.9' },
-   { path: '/nosotros', changefreq: 'yearly', priority: '0.7' },
+   { path: '/', changefreq: 'monthly', priority: '1.0', lastmod: ACTUALIZADO },
+   { path: '/servicios', changefreq: 'monthly', priority: '0.9', lastmod: ACTUALIZADO },
+   { path: '/nosotros', changefreq: 'yearly', priority: '0.7', lastmod: ACTUALIZADO },
    { path: '/conocimiento', changefreq: 'weekly', priority: '0.8' },
-   { path: '/contacto', changefreq: 'yearly', priority: '0.7' },
+   { path: '/contacto', changefreq: 'yearly', priority: '0.7', lastmod: ACTUALIZADO },
    { path: '/aviso-de-privacidad', changefreq: 'yearly', priority: '0.2' },
 ];
 
@@ -36,10 +38,11 @@ export const GET: APIRoute = async ({ request }) => {
          path: `/servicios/${s.slug}`,
          changefreq: 'yearly',
          priority: '0.8',
+         lastmod: ACTUALIZADO,
       })),
       ...articulos.map((a) => ({
          path: `/conocimiento/${a.id}`,
-         changefreq: 'yearly',
+         changefreq: 'monthly',
          priority: '0.6',
          lastmod: a.data.fecha.toISOString().split('T')[0],
       })),

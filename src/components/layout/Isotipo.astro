@@ -1,0 +1,30 @@
+---
+/**
+ * Isotipo de BioAltaris: una red de nodos (verde y azul de marca) que
+ * converge en un nodo central con halo. Reconstruido en SVG a partir del
+ * mock aprobado en septiembre de 2026; no hay archivo vectorial de origen.
+ *
+ * Los colores salen de los tokens (`--accent`, `--accent-2`, `--line`), así
+ * que sigue al tema claro/oscuro sin variantes. Para favicon y PNG, donde no
+ * hay CSS, existe scripts/brand/ con los hex de marca fijos.
+ */
+interface Props {
+   class?: string;
+}
+
+const { class: className = 'h-9 w-9' } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 48 48" fill="none" aria-hidden="true" focusable="false">
+   <g stroke="rgb(var(--accent-2) / 0.55)" stroke-width="1.2" stroke-linecap="round">
+      <path d="M9 8 17 17M17 17 24 26M40 7l-6 10M34 17l-10 9M24 26l-1 15M24 26l19 12"></path>
+   </g>
+   <circle cx="24" cy="26" r="9" fill="rgb(var(--accent) / 0.18)"></circle>
+   <circle cx="24" cy="26" r="5" fill="rgb(var(--accent))"></circle>
+   <circle cx="17" cy="17" r="2.4" fill="rgb(var(--accent))"></circle>
+   <circle cx="34" cy="17" r="2.4" fill="rgb(var(--accent))"></circle>
+   <circle cx="43" cy="38" r="2.6" fill="rgb(var(--accent))"></circle>
+   <circle cx="9" cy="8" r="2.6" fill="rgb(var(--accent-2))"></circle>
+   <circle cx="40" cy="7" r="2.6" fill="rgb(var(--accent-2))"></circle>
+   <circle cx="23" cy="41" r="2.4" fill="rgb(var(--accent-2))"></circle>
+</svg>

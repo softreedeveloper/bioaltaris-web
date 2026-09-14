@@ -59,25 +59,43 @@ export const EQUIPO: MiembroEquipo[] = [
    },
 ];
 
-/** Diferenciadores de la diapositiva "¿Por qué elegirnos?". */
+/**
+ * Diferenciadores de "Un equipo, no un proveedor" (home). Copy de la maqueta
+ * de la revisión de septiembre de 2026; sustituye a las dos tarjetas largas
+ * del PPTX original ("Acompañamiento personalizado" y "Experiencia").
+ */
 export const DIFERENCIADORES = [
    {
-      titulo: 'Acompañamiento personalizado',
-      descripcion:
-         'Desde el primer contacto, cada proyecto es asignado a un equipo de asesores especializados que lo acompañan de principio a fin, garantizando continuidad, seguimiento cercano y respuestas oportunas en cada etapa del proceso.',
+      titulo: 'Un mismo equipo de principio a fin',
+      descripcion: 'Tu proyecto no cambia de manos entre etapas.',
    },
    {
-      titulo: 'Experiencia',
-      descripcion:
-         'Nuestro equipo científico cuenta con más de 5 años de experiencia en investigación biofarmacéutica y preclínica, en los que se ha preparado para apoyarlo en sus retos.',
+      titulo: 'Ciencia con visión regulatoria',
+      descripcion: 'Diseñamos cada estudio pensando en cómo será evaluado.',
+   },
+   {
+      titulo: 'Implementación en tu laboratorio',
+      descripcion: 'Transferimos la metodología y capacitamos a tu equipo.',
    },
 ];
 
-/** Copy de "¿Quiénes somos?" y "Compromiso" — literal del PPTX. */
+/** Copy de "Quiénes somos" (home) y "Nuestro compromiso" — revisión de septiembre de 2026. */
 export const QUIENES_SOMOS = [
-   'Somos una consultoría biofarmacéutica especializada en el desarrollo preclínico, la validación analítica, el control de calidad y la regulación de productos biológicos y biofarmacéuticos. Ofrecemos asesoría integral, acompañándote en cada etapa del proceso, desde el análisis del reto hasta la obtención y el análisis de los resultados.',
-   'Integramos rigor científico y experiencia especializada en inmunología, farmacología, desarrollo farmacéutico y modelos preclínicos murinos, con un enfoque estratégico que conecta la ciencia de vanguardia con las necesidades reales de la industria farmacéutica. Trabajamos conforme a estándares regulatorios nacionales e internacionales para garantizar resultados sólidos, confiables y con proyección internacional.',
+   'Somos una consultoría biofarmacéutica con especialistas en inmunología, farmacología y desarrollo farmacéutico que acompañan a la industria biofarmacéutica desde el planteamiento hasta la interpretación de resultados.',
 ];
 
 export const COMPROMISO =
-   'Nuestro compromiso es ofrecer un acompañamiento cercano y personalizado, donde cada proyecto cuenta con un equipo de asesores capaces que lo guían de inicio a fin.';
+   'Ofrecer un acompañamiento cercano y personalizado, donde cada proyecto cuenta con un equipo de asesores capaces que lo guían de inicio a fin.';
+
+/** Cabecera de /nosotros, según la maqueta "Especialistas que responden por cada resultado". */
+export const NOSOTROS_HERO = {
+   titulo: 'Especialistas que responden por cada resultado',
+   descripcion:
+      'Somos un equipo de científicos en inmunología, farmacología y caracterización analítica que asume cada proyecto con la seriedad que exige la industria.',
+};
+
+export const VALORES = [
+   { titulo: 'Responsabilidad', descripcion: 'Respondemos por cada dato que entregamos.' },
+   { titulo: 'Compromiso', descripcion: 'Nos involucramos en tus objetivos, no solo en la tarea.' },
+   { titulo: 'Integridad', descripcion: 'Reportamos los resultados tal como son.' },
+];

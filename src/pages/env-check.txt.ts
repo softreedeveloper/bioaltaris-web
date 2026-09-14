@@ -11,6 +11,15 @@ import { getSiteConfig } from '@utils/config';
 export const GET: APIRoute = ({ request }) => {
    const cfg = getSiteConfig(request);
 
+   // En producción no se expone: solo responde con la cabecera X-Env-Check
+   // igual a ENV_CHECK_TOKEN (variable de entorno del servidor).
+   if (cfg.isProduction) {
+      const token = import.meta.env.ENV_CHECK_TOKEN;
+      if (!token || request.headers.get('x-env-check') !== token) {
+         return new Response('Not found', { status: 404, headers: { 'X-Robots-Tag': 'noindex' } });
+      }
+   }
+
    const lineas = [
       `PUBLIC_SITE_ENV : ${import.meta.env.PUBLIC_SITE_ENV ?? '(sin definir)'}`,
       `environment     : ${cfg.environment}`,

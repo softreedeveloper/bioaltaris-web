@@ -60,6 +60,14 @@ export function generateOrganizationSchema(request?: Request) {
       url: cfg.canonicalUrl,
       description: cfg.site.description,
       email: cfg.contact.email,
+      telephone: `+${cfg.contact.whatsapp}`,
+      logo: {
+         '@type': 'ImageObject',
+         url: abs('/brand/bioaltaris-logo-512.png', cfg),
+         width: 512,
+         height: 512,
+      },
+      image: cfg.defaultImage,
       address: cfg.contact.address
          ? {
               '@type': 'PostalAddress',
@@ -75,6 +83,7 @@ export function generateOrganizationSchema(request?: Request) {
          '@type': 'ContactPoint',
          contactType: cfg.business.contactType,
          email: cfg.contact.email,
+         telephone: `+${cfg.contact.whatsapp}`,
          availableLanguage: cfg.business.availableLanguage,
       },
    });
@@ -186,6 +195,8 @@ export function generatePersonSchemas(request?: Request) {
          name: miembro.nombre,
          jobTitle: miembro.area,
          description: miembro.bio,
+         // `src` de ImageMetadata ya es la ruta emitida (/_astro/…hash.jpg).
+         image: miembro.foto ? abs(miembro.foto.src, cfg) : undefined,
          worksFor: { '@id': `${cfg.canonicalUrl}/#organization` },
          alumniOf: miembro.credenciales.map((c) => ({
             '@type': 'EducationalOrganization',
@@ -231,6 +242,8 @@ export function generateArticleSchema(article: ArticleInput, request?: Request) 
 
 interface PageSchemaEntry {
    name: string;
+   /** <title> por defecto de la ruta (≤ 60 caracteres, keyword primero). */
+   title?: string;
    /** Meta description por defecto de la ruta. null = usa la del sitio. */
    description: string | null;
    /** Label de la miga de pan. null = es la raíz. */
@@ -242,8 +255,9 @@ interface PageSchemaEntry {
 export const PAGE_SCHEMA: Record<string, PageSchemaEntry> = {
    '/': {
       name: 'BioAltaris — Consultoría biofarmacéutica',
+      title: 'Consultoría biofarmacéutica en México | BioAltaris',
       description:
-         'Consultoría biofarmacéutica en desarrollo preclínico, validación analítica y regulación de biológicos. Del laboratorio al expediente regulatorio, con acompañamiento en cada etapa.',
+         'Consultoría biofarmacéutica en México: bioensayos, modelos in vivo, caracterización analítica, estrategia regulatoria ante COFEPRIS y patentes. Hablemos.',
       breadcrumb: null,
       build: (request) => [
          generateWebSiteSchema(request),
@@ -253,7 +267,8 @@ export const PAGE_SCHEMA: Record<string, PageSchemaEntry> = {
    },
    '/servicios': {
       name: 'Servicios',
-      description: `Catálogo de ${SERVICIOS.length} servicios en ${CATEGORIAS.length} etapas: evaluación preclínica, caracterización analítica y estrategia regulatoria para productos biológicos.`,
+      title: 'Servicios de consultoría biofarmacéutica | BioAltaris',
+      description: `${SERVICIOS.length} servicios en ${CATEGORIAS.length} etapas: evaluación preclínica, caracterización analítica y estrategia regulatoria para biológicos en México. Uno o el recorrido completo.`,
       breadcrumb: 'Servicios',
       type: 'CollectionPage',
       build: (request) => [
@@ -272,8 +287,9 @@ export const PAGE_SCHEMA: Record<string, PageSchemaEntry> = {
    },
    '/nosotros': {
       name: 'Nosotros',
+      title: 'Equipo científico biofarmacéutico en México | BioAltaris',
       description:
-         'Equipo científico con formación en CINVESTAV, IPN y UNAM, especializado en inmunología, farmacología y modelos preclínicos bajo estándares regulatorios nacionales e internacionales.',
+         'Doctores y maestros en ciencias (CINVESTAV, IPN, UNAM) en inmunología, farmacología y modelos preclínicos. Conoce al equipo de BioAltaris en México y hablemos.',
       breadcrumb: 'Nosotros',
       type: 'AboutPage',
       build: (request) => [
@@ -292,21 +308,25 @@ export const PAGE_SCHEMA: Record<string, PageSchemaEntry> = {
    },
    '/conocimiento': {
       name: 'Impulsando el conocimiento',
+      title: 'Novedades regulatorias y científicas | BioAltaris',
       description:
-         'Novedades regulatorias, publicaciones y avances en desarrollo biofarmacéutico seleccionados por el equipo de BioAltaris.',
+         'Novedades de COFEPRIS, FDA y EMA, publicaciones y avances en desarrollo biofarmacéutico seleccionados por el equipo de BioAltaris en México.',
       breadcrumb: 'Conocimiento',
       type: 'CollectionPage',
    },
    '/contacto': {
       name: 'Contacto',
+      title: 'Contacto: inicia tu proyecto biofarmacéutico | BioAltaris',
       description:
-         'Cuéntanos sobre tu reto en desarrollo biofarmacéutico. Nuestro equipo de asesores te contactará a la brevedad.',
+         'Cuéntanos tu reto en desarrollo biofarmacéutico. Escríbenos por formulario, correo o WhatsApp y el equipo de BioAltaris en México te responde a la brevedad.',
       breadcrumb: 'Contacto',
       type: 'ContactPage',
    },
    '/aviso-de-privacidad': {
       name: 'Aviso de privacidad',
-      description: 'Aviso de privacidad de BioAltaris: qué datos personales tratamos, con qué fin y cómo ejercer tus derechos ARCO.',
+      title: 'Aviso de privacidad | BioAltaris',
+      description:
+         'Aviso de privacidad de BioAltaris: qué datos personales tratamos, con qué fin y cómo ejercer tus derechos ARCO.',
       breadcrumb: 'Aviso de privacidad',
    },
 };

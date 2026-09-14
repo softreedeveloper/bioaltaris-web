@@ -27,6 +27,12 @@ export const siteConfigData = {
    stagingHostnames: ['stage-bioaltaris.netlify.app', 'stage.bioaltaris.com'],
    contact: {
       email: 'contacto@bioaltaris.com',
+      // WhatsApp de contacto (México). `whatsapp` va en formato internacional
+      // sin "+" ni espacios, que es el que exige wa.me; `whatsappDisplay` es
+      // como se muestra en pantalla.
+      whatsapp: '525534857570',
+      whatsappDisplay: '+52 55 3485 7570',
+      whatsappMensaje: 'Hola, BioAltaris. Me gustaría recibir más información sobre sus servicios.',
       // PENDIENTE: el PPTX dice "[Dirección de oficinas — pendiente de confirmar]".
       // Mientras esté vacío no se emite PostalAddress en el JSON-LD ni se
       // pinta el bloque de dirección en el footer.
@@ -113,6 +119,10 @@ function buildConfig(env: SiteEnv) {
       get defaultImage(): string {
          return `${this.siteUrl}${this.assets.defaultOgImage}`;
       },
+      /** Enlace a WhatsApp con el mensaje inicial ya escrito. */
+      get whatsappUrl(): string {
+         return `https://wa.me/${this.contact.whatsapp}?text=${encodeURIComponent(this.contact.whatsappMensaje)}`;
+      },
    };
 }
 
@@ -126,6 +136,17 @@ export function getSiteConfig(request?: Request) {
 export const siteConfig = buildConfig(resolveEnv(null));
 
 export type SiteConfig = ReturnType<typeof buildConfig>;
+
+/**
+ * Recorta un texto a `max` caracteres sin partir palabras, para titles
+ * (~60) y descriptions (~160) que Google truncaría igual.
+ */
+export function recortar(texto: string, max: number): string {
+   if (texto.length <= max) return texto;
+   const corte = texto.slice(0, max - 1);
+   const ultimoEspacio = corte.lastIndexOf(' ');
+   return `${corte.slice(0, ultimoEspacio > max * 0.6 ? ultimoEspacio : max - 1).replace(/[\s,.;:]+$/, '')}…`;
+}
 
 export interface SEOProps {
    title?: string;
