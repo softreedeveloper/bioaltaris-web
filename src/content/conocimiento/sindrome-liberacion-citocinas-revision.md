@@ -1,6 +1,7 @@
 ---
 titulo: 'Síndrome de liberación de citocinas en terapias celulares adoptivas: revisión sistemática'
 resumen: 'Revisión sistemática sobre la incidencia, los mecanismos y el manejo del síndrome de liberación de citocinas en terapias celulares adoptivas.'
+seoTitulo: 'Síndrome de liberación de citocinas en terapias celulares'
 fecha: 2023-06-01
 fuente: 'Biomedicina Molecular · Vol. 8, pp. 112–130'
 categorias: ['Oncología', 'Inmunoterapia']

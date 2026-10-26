@@ -18,7 +18,7 @@
  * una etiqueta real y trata el texto siguiente como JavaScript, lo que rompe
  * `astro dev` con «Failed to scan for dependencies from entries».
  */
-const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
+import { GTM_ID } from '@utils/tracking-ids';
 ---
 
 {

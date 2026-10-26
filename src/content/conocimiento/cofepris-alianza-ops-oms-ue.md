@@ -1,6 +1,8 @@
 ---
 titulo: 'COFEPRIS establece una alianza estratégica con la OPS/OMS y la Unión Europea'
 resumen: 'La alianza busca fortalecer la regulación de medicamentos y vacunas en México, con impacto directo en los requisitos de sometimiento para productos biológicos.'
+seoTitulo: 'COFEPRIS se alía con la OPS/OMS y la UE en regulación'
+seoDescripcion: 'COFEPRIS se alía con la OPS/OMS y la Unión Europea para fortalecer la regulación de medicamentos y vacunas en México y el sometimiento de biológicos.'
 fecha: 2026-01-15
 fuente: 'COFEPRIS'
 categorias: ['Regulatorio', 'México']

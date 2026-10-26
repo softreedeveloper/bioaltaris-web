@@ -8,7 +8,7 @@
  * `metapixel:ready` que emite metaPixel.js y además se comprueba si ya estaba
  * listo, así que ninguno de los dos órdenes de carga falla.
  */
-const pixelId = import.meta.env.PUBLIC_META_PIXEL_ID;
+import { META_PIXEL_ID as pixelId } from '@utils/tracking-ids';
 ---
 
 {

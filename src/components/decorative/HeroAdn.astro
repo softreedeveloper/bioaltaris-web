@@ -77,6 +77,38 @@ const fondoA = hebraA.filter(alFondo);
 const fondoB = hebraB.filter(alFondo);
 const frenteA = hebraA.filter(alFrente);
 const frenteB = hebraB.filter(alFrente);
+
+// Los ~600 círculos se emiten como texto y con un decimal: como nodos del
+// template cada uno llevaba el atributo `data-astro-cid` y coordenadas de
+// 15 dígitos, y la hélice sola eran ~94 KB del HTML de la home.
+const num = (v: number) => String(Math.round(v * 10) / 10);
+const VERDE = 'url(#adn-verde)';
+const AZUL = 'url(#adn-azul)';
+const circulo = (x: number, y: number, r: number, fill: string, opacidad?: number) =>
+   `<circle cx="${num(x)}" cy="${num(y)}" r="${num(r)}" fill="${fill}"${
+      opacidad === undefined ? '' : ` fill-opacity="${Math.round(opacidad * 100) / 100}"`
+   }/>`;
+const puntos = (lista: Punto[], fill: string) =>
+   lista.map((p) => circulo(p.x, p.y, radio(p), fill, opacidad(p))).join('');
+
+const helice = [
+   // Bokeh ambiente
+   `<g filter="url(#adn-bokeh)">${bokeh.map((b) => circulo(b.x, b.y, b.r, b.azul ? AZUL : VERDE, b.o)).join('')}</g>`,
+   // Halo de las hebras: solo los puntos que están al frente brillan
+   `<g filter="url(#adn-halo)">${conHalo.map((p) => circulo(p.x, p.y, radio(p) * 2.2, VERDE, p.prof * 0.55)).join('')}</g>`,
+   // Hebra y peldaños al fondo (desenfocados)
+   `<g filter="url(#adn-fondo)">${puntos(fondoA, VERDE)}${puntos(fondoB, AZUL)}</g>`,
+   // Pares de bases
+   ...peldanos.map(
+      (pl) =>
+         `<g fill-opacity="${Math.round((0.3 + pl.prof * 0.5) * 100) / 100}">${pl.bases
+            .map((b, k) => circulo(b.x, b.y, b.r, k % 2 === 0 ? VERDE : AZUL))
+            .join('')}</g>`,
+   ),
+   // Hebras al frente (nítidas)
+   puntos(frenteA, VERDE),
+   puntos(frenteB, AZUL),
+].join('');
 ---
 
 <div
@@ -106,68 +138,7 @@ const frenteB = hebraB.filter(alFrente);
          </filter>
       </defs>
 
-      <g class="hero-adn-helice">
-         {/* Bokeh ambiente */}
-         <g filter="url(#adn-bokeh)">
-            {
-               bokeh.map((b) => (
-                  <circle
-                     cx={b.x}
-                     cy={b.y}
-                     r={b.r}
-                     fill={b.azul ? 'url(#adn-azul)' : 'url(#adn-verde)'}
-                     fill-opacity={b.o}
-                  />
-               ))
-            }
-         </g>
-
-         {/* Halo de las hebras: solo los puntos que están al frente brillan */}
-         <g filter="url(#adn-halo)">
-            {
-               conHalo.map((p) => (
-                  <circle cx={p.x} cy={p.y} r={radio(p) * 2.2} fill="url(#adn-verde)" fill-opacity={p.prof * 0.55} />
-               ))
-            }
-         </g>
-
-         {/* Hebra y peldaños al fondo (desenfocados) */}
-         <g filter="url(#adn-fondo)">
-            {
-               fondoA.map((p) => (
-                  <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-verde)" fill-opacity={opacidad(p)} />
-               ))
-            }
-            {
-               fondoB.map((p) => (
-                  <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-azul)" fill-opacity={opacidad(p)} />
-               ))
-            }
-         </g>
-
-         {/* Pares de bases */}
-         {
-            peldanos.map((pl) => (
-               <g fill-opacity={0.3 + pl.prof * 0.5}>
-                  {pl.bases.map((b, k) => (
-                     <circle cx={b.x} cy={b.y} r={b.r} fill={k % 2 === 0 ? 'url(#adn-verde)' : 'url(#adn-azul)'} />
-                  ))}
-               </g>
-            ))
-         }
-
-         {/* Hebras al frente (nítidas) */}
-         {
-            frenteA.map((p) => (
-               <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-verde)" fill-opacity={opacidad(p)} />
-            ))
-         }
-         {
-            frenteB.map((p) => (
-               <circle cx={p.x} cy={p.y} r={radio(p)} fill="url(#adn-azul)" fill-opacity={opacidad(p)} />
-            ))
-         }
-      </g>
+      <g class="hero-adn-helice" set:html={helice} />
    </svg>
 </div>
 

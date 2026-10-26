@@ -26,6 +26,8 @@ export interface Categoria {
 export interface Servicio {
    slug: string;
    titulo: string;
+   /** Title SEO sin la marca (≤ 47 caracteres para que quepa " | BioAltaris"). */
+   seoTitle?: string;
    categoria: CategoriaId;
    tag: string;
    /** Cuál de los dos acentos de marca usa la etiqueta. */
@@ -88,6 +90,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'bioensayos-celulares',
       titulo: 'Bioensayos celulares',
+      seoTitle: 'Bioensayos celulares de potencia y viabilidad',
       categoria: 'evaluacion-preclinica',
       tag: 'Inmunología',
       acento: 'verde',
@@ -100,6 +103,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'modelos-in-vivo',
       titulo: 'Modelos in vivo',
+      seoTitle: 'Modelos in vivo para estudios preclínicos',
       categoria: 'evaluacion-preclinica',
       tag: 'Preclínica',
       acento: 'verde',
@@ -116,6 +120,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'inmunogenicidad-y-toxicologia',
       titulo: 'Inmunogenicidad y toxicología',
+      seoTitle: 'Inmunogenicidad y toxicología preclínica',
       categoria: 'evaluacion-preclinica',
       tag: 'Seguridad',
       acento: 'azul',
@@ -128,6 +133,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'biodistribucion',
       titulo: 'Biodistribución',
+      seoTitle: 'Estudios de biodistribución y farmacocinética',
       categoria: 'evaluacion-preclinica',
       tag: 'Cinética',
       acento: 'verde',
@@ -142,6 +148,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'evaluacion-farmaceutica',
       titulo: 'Evaluación farmacéutica',
+      seoTitle: 'Evaluación farmacéutica de biológicos',
       categoria: 'caracterizacion-analitica',
       tag: 'Calidad',
       acento: 'verde',
@@ -160,6 +167,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'estudios-de-vida-util',
       titulo: 'Estudios de vida útil',
+      seoTitle: 'Estudios de estabilidad y vida útil',
       categoria: 'caracterizacion-analitica',
       tag: 'Estabilidad',
       acento: 'azul',
@@ -176,6 +184,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'analisis-estadistico',
       titulo: 'Análisis estadístico',
+      seoTitle: 'Análisis estadístico para reportes regulatorios',
       categoria: 'caracterizacion-analitica',
       tag: 'Datos',
       acento: 'verde',
@@ -188,6 +197,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'traduccion-tecnica',
       titulo: 'Traducción técnica',
+      seoTitle: 'Traducción técnica farmacéutica ES-EN',
       categoria: 'caracterizacion-analitica',
       tag: 'Soporte',
       acento: 'azul',
@@ -202,6 +212,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'dossier-regulatorio',
       titulo: 'Dossier regulatorio',
+      seoTitle: 'Dossier regulatorio COFEPRIS para biológicos',
       categoria: 'estrategia-desarrollo',
       tag: 'Regulatorio',
       acento: 'verde',
@@ -214,6 +225,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'evaluacion-trl',
       titulo: 'Evaluación TRL',
+      seoTitle: 'Evaluación TRL de madurez tecnológica',
       categoria: 'estrategia-desarrollo',
       tag: 'Madurez',
       acento: 'azul',
@@ -230,6 +242,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'auditoria-cientifica',
       titulo: 'Auditoría científica',
+      seoTitle: 'Auditoría científica de protocolos y reportes',
       categoria: 'estrategia-desarrollo',
       tag: 'Auditoría',
       acento: 'verde',
@@ -242,6 +255,7 @@ export const SERVICIOS: Servicio[] = [
    {
       slug: 'asesoria-en-patentes',
       titulo: 'Asesoría en patentes',
+      seoTitle: 'Asesoría en patentes biotecnológicas',
       categoria: 'estrategia-desarrollo',
       tag: 'Propiedad',
       acento: 'azul',

@@ -4,22 +4,38 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
 import { generateArticleSchema, generateBreadcrumbSchema } from '@utils/schema';
-import { recortar } from '@utils/config';
+import { recortar, tituloConMarca } from '@utils/config';
 
 // On-demand como el resto del sitio: prerenderizar fijaba el canonical y el
 // og:url con el hostname del build en vez del de la petición.
 const entrada = await getEntry('conocimiento', Astro.params.slug ?? '');
 if (!entrada || entrada.data.borrador) return Astro.rewrite('/404');
 const { Content } = await render(entrada);
-const { titulo, resumen, fecha, fuente, categorias } = entrada.data;
+const { titulo, resumen, fecha, actualizado, fuente, categorias, seoTitulo, seoDescripcion } = entrada.data;
 
 const path = `/conocimiento/${entrada.id}`;
+
+// Imagen OG propia si ya se generó (scripts/brand/generar-og.mjs); un artículo
+// recién publicado sin ella usa la genérica en vez de apuntar a un 404.
+const ogGeneradas = Object.keys(import.meta.glob('/public/og/conocimiento/*.jpg'));
+const ogImagen = ogGeneradas.includes(`/public/og/conocimiento/${entrada.id}.jpg`)
+   ? `/og/conocimiento/${entrada.id}.jpg`
+   : undefined;
 const fechaISO = fecha.toISOString();
+const actualizadoISO = actualizado?.toISOString();
 const fechaLegible = fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const schema = [
    generateArticleSchema(
-      { title: titulo, description: resumen, path, publishedTime: fechaISO, tags: categorias },
+      {
+         title: titulo,
+         description: resumen,
+         path,
+         publishedTime: fechaISO,
+         modifiedTime: actualizadoISO,
+         image: ogImagen,
+         tags: categorias,
+      },
       Astro.request,
    ),
    generateBreadcrumbSchema(
@@ -33,10 +49,12 @@ const schema = [
 ---
 
 <BaseLayout
-   title={`${recortar(titulo, 60)} | BioAltaris`}
-   description={recortar(resumen, 160)}
+   title={tituloConMarca(seoTitulo ?? titulo, 'BioAltaris')}
+   description={seoDescripcion ?? recortar(resumen, 160)}
+   image={ogImagen}
    type="article"
    publishedTime={fechaISO}
+   modifiedTime={actualizadoISO}
    schema={schema}
 >
    <article class="container-site pb-section pt-10 lg:pt-14">
