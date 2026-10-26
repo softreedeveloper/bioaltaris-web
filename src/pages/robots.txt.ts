@@ -14,7 +14,6 @@ export const GET: APIRoute = ({ request }) => {
 Allow: /
 Disallow: /api/
 Disallow: /env-check.txt
-Disallow: /brand/
 
 Sitemap: ${base}/sitemap.xml
 `

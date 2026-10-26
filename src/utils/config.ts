@@ -148,6 +148,31 @@ export function recortar(texto: string, max: number): string {
    return `${corte.slice(0, ultimoEspacio > max * 0.6 ? ultimoEspacio : max - 1).replace(/[\s,.;:]+$/, '')}…`;
 }
 
+/**
+ * Une frases completas mientras quepan en `max`. Una description que termina
+ * en "Solicita una…" se ve rota en el snippet; mejor soltar la última frase
+ * entera. Solo recorta si ni la primera cabe.
+ */
+export function unirFrases(frases: string[], max: number): string {
+   let texto = frases[0] ?? '';
+   for (const frase of frases.slice(1)) {
+      const candidato = `${texto} ${frase}`;
+      if (candidato.length > max) break;
+      texto = candidato;
+   }
+   return recortar(texto, max);
+}
+
+/**
+ * Title con sufijo de marca solo si cabe en 60 caracteres. Un title largo se
+ * queda sin marca antes que truncarse con "…".
+ */
+export function tituloConMarca(titulo: string, marca: string, max = 60): string {
+   const conMarca = `${titulo} | ${marca}`;
+   if (conMarca.length <= max) return conMarca;
+   return recortar(titulo, max);
+}
+
 export interface SEOProps {
    title?: string;
    description?: string;

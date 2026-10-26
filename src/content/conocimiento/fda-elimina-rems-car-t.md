@@ -1,6 +1,8 @@
 ---
 titulo: 'La FDA elimina los requisitos de REMS para las terapias CAR-T aprobadas'
 resumen: 'La medida cubre las terapias dirigidas a CD19 y BCMA, reduce la certificación de sitios y el monitoreo post-infusión, y facilita el acceso a estos tratamientos.'
+seoTitulo: 'La FDA elimina los REMS de las terapias CAR-T'
+seoDescripcion: 'La FDA retira los REMS de las terapias CAR-T dirigidas a CD19 y BCMA: menos certificación de sitios y monitoreo post-infusión, y mejor acceso al tratamiento.'
 fecha: 2026-02-10
 fuente: 'FDA'
 categorias: ['Regulatorio', 'Terapias celulares']

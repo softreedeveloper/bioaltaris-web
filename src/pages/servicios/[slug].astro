@@ -6,7 +6,7 @@ import CtaSection from '@components/ui/CtaSection.astro';
 import { CTA_PRINCIPAL } from '@constants/navegacion';
 import { getServicio, getCategoria, serviciosPorCategoria } from '@constants/servicios';
 import { generateServiceSchema, generateBreadcrumbSchema } from '@utils/schema';
-import { recortar } from '@utils/config';
+import { unirFrases } from '@utils/config';
 
 // On-demand como el resto del sitio: prerenderizar fijaba el canonical y el
 // og:url con el hostname del build en vez del de la petición.
@@ -15,8 +15,12 @@ if (!servicio) return Astro.rewrite('/404');
 
 const categoria = getCategoria(servicio.categoria);
 const seoTitle = `${servicio.titulo} en México | BioAltaris`;
-const seoDescription = recortar(
-   `${servicio.resumen} Servicio de ${categoria.nombre.toLowerCase()} de BioAltaris en México. Solicita una propuesta.`,
+const seoDescription = unirFrases(
+   [
+      servicio.resumen,
+      `Servicio de ${categoria.nombre.toLowerCase()} de BioAltaris en México.`,
+      'Solicita una propuesta.',
+   ],
    160,
 );
 const relacionados = serviciosPorCategoria(servicio.categoria).filter((s) => s.slug !== servicio.slug);
@@ -34,7 +38,7 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} type="article" schema={schema}>
+<BaseLayout title={seoTitle} description={seoDescription} type="website" schema={schema}>
    <article>
       <header class="container-site pb-10 pt-10 lg:pt-14">
          <Breadcrumbs items={[{ name: 'Servicios', href: '/servicios' }, { name: servicio.titulo }]} />

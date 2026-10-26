@@ -12,6 +12,10 @@ const conocimiento = defineCollection({
       titulo: z.string(),
       // Resumen para el listado, la meta description y el JSON-LD.
       resumen: z.string(),
+      // Overrides SEO opcionales: title (≤ 60 con o sin "| BioAltaris") y meta
+      // description (≤ 160). Sin ellos se usan titulo y resumen.
+      seoTitulo: z.string().max(60).optional(),
+      seoDescripcion: z.string().max(160).optional(),
       fecha: z.coerce.date(),
       // Origen del contenido: publicación, agencia, revista…
       fuente: z.string().optional(),

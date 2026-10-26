@@ -4,14 +4,14 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
 import { generateArticleSchema, generateBreadcrumbSchema } from '@utils/schema';
-import { recortar } from '@utils/config';
+import { recortar, tituloConMarca } from '@utils/config';
 
 // On-demand como el resto del sitio: prerenderizar fijaba el canonical y el
 // og:url con el hostname del build en vez del de la petición.
 const entrada = await getEntry('conocimiento', Astro.params.slug ?? '');
 if (!entrada || entrada.data.borrador) return Astro.rewrite('/404');
 const { Content } = await render(entrada);
-const { titulo, resumen, fecha, fuente, categorias } = entrada.data;
+const { titulo, resumen, fecha, fuente, categorias, seoTitulo, seoDescripcion } = entrada.data;
 
 const path = `/conocimiento/${entrada.id}`;
 const fechaISO = fecha.toISOString();
@@ -33,8 +33,8 @@ const schema = [
 ---
 
 <BaseLayout
-   title={`${recortar(titulo, 60)} | BioAltaris`}
-   description={recortar(resumen, 160)}
+   title={tituloConMarca(seoTitulo ?? titulo, 'BioAltaris')}
+   description={seoDescripcion ?? recortar(resumen, 160)}
    type="article"
    publishedTime={fechaISO}
    schema={schema}
