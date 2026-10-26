@@ -4,6 +4,12 @@ import Breadcrumbs from '@components/ui/Breadcrumbs.astro';
 import CtaSection from '@components/ui/CtaSection.astro';
 import TeamGrid from '@components/ui/TeamGrid.astro';
 import { NOSOTROS_HERO, VALORES } from '@constants/equipo';
+
+// TEMPORAL: la sección Nosotros está oculta hasta que vuelva el contenido del
+// equipo. Redirección 302 (temporal) a la home para no servir un 404 en una
+// URL que ya está indexada. Para restaurarla, quitar esta línea y descomentar
+// la entrada en navegacion.ts y sitemap.xml.ts.
+return Astro.redirect('/', 302);
 ---
 
 <BaseLayout>

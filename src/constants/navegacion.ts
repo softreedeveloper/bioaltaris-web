@@ -7,7 +7,8 @@ export interface NavLink {
 
 export const NAV_LINKS: NavLink[] = [
    { href: '/servicios', label: 'Servicios' },
-   { href: '/nosotros', label: 'Nosotros' },
+   // TEMPORAL: Nosotros oculto hasta que vuelva el contenido del equipo.
+   // { href: '/nosotros', label: 'Nosotros' },
    { href: '/conocimiento', label: 'Conocimiento' },
    { href: '/contacto', label: 'Contacto' },
 ];

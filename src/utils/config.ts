@@ -30,8 +30,8 @@ export const siteConfigData = {
       // WhatsApp de contacto (México). `whatsapp` va en formato internacional
       // sin "+" ni espacios, que es el que exige wa.me; `whatsappDisplay` es
       // como se muestra en pantalla.
-      whatsapp: '525534857570',
-      whatsappDisplay: '+52 55 3485 7570',
+      whatsapp: '525654711884',
+      whatsappDisplay: '+52 56 5471 1884',
       whatsappMensaje: 'Hola, BioAltaris. Me gustaría recibir más información sobre sus servicios.',
       // PENDIENTE: el PPTX dice "[Dirección de oficinas — pendiente de confirmar]".
       // Mientras esté vacío no se emite PostalAddress en el JSON-LD ni se
