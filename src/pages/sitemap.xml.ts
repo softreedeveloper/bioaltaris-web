@@ -21,7 +21,8 @@ interface Entrada {
 const ESTATICAS: Entrada[] = [
    { path: '/', changefreq: 'monthly', priority: '1.0', lastmod: ACTUALIZADO },
    { path: '/servicios', changefreq: 'monthly', priority: '0.9', lastmod: ACTUALIZADO },
-   { path: '/nosotros', changefreq: 'yearly', priority: '0.7', lastmod: ACTUALIZADO },
+   // TEMPORAL: fuera del sitemap mientras /nosotros esté oculto.
+   // { path: '/nosotros', changefreq: 'yearly', priority: '0.7', lastmod: ACTUALIZADO },
    { path: '/conocimiento', changefreq: 'weekly', priority: '0.8' },
    { path: '/contacto', changefreq: 'yearly', priority: '0.7', lastmod: ACTUALIZADO },
    { path: '/aviso-de-privacidad', changefreq: 'yearly', priority: '0.2' },
