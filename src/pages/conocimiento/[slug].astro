@@ -11,15 +11,23 @@ import { recortar, tituloConMarca } from '@utils/config';
 const entrada = await getEntry('conocimiento', Astro.params.slug ?? '');
 if (!entrada || entrada.data.borrador) return Astro.rewrite('/404');
 const { Content } = await render(entrada);
-const { titulo, resumen, fecha, fuente, categorias, seoTitulo, seoDescripcion } = entrada.data;
+const { titulo, resumen, fecha, actualizado, fuente, categorias, seoTitulo, seoDescripcion } = entrada.data;
 
 const path = `/conocimiento/${entrada.id}`;
 const fechaISO = fecha.toISOString();
+const actualizadoISO = actualizado?.toISOString();
 const fechaLegible = fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const schema = [
    generateArticleSchema(
-      { title: titulo, description: resumen, path, publishedTime: fechaISO, tags: categorias },
+      {
+         title: titulo,
+         description: resumen,
+         path,
+         publishedTime: fechaISO,
+         modifiedTime: actualizadoISO,
+         tags: categorias,
+      },
       Astro.request,
    ),
    generateBreadcrumbSchema(
@@ -37,6 +45,7 @@ const schema = [
    description={seoDescripcion ?? recortar(resumen, 160)}
    type="article"
    publishedTime={fechaISO}
+   modifiedTime={actualizadoISO}
    schema={schema}
 >
    <article class="container-site pb-section pt-10 lg:pt-14">

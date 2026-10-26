@@ -341,6 +341,28 @@ function breadcrumbFor(pathname: string, request?: Request) {
 // API pública
 // ---------------------------------------------------------------------------
 
+/**
+ * Un solo JSON-LD por página en forma de `@graph`. Organization y WebSite van
+ * siempre, para que los `{ "@id": …#organization }` de provider, author y
+ * publisher resuelvan dentro del mismo documento y no solo en la home.
+ */
+export function buildGraph(nodos: unknown[], request?: Request) {
+   const vistos = new Set<string>();
+   const graph = [generateOrganizationSchema(request), generateWebSiteSchema(request), ...nodos.flat()].flatMap(
+      (nodo) => {
+         if (!nodo || typeof nodo !== 'object') return [];
+         const { '@context': _contexto, ...resto } = nodo as Record<string, unknown>;
+         const id = resto['@id'];
+         if (typeof id === 'string') {
+            if (vistos.has(id)) return [];
+            vistos.add(id);
+         }
+         return [resto];
+      },
+   );
+   return { '@context': CONTEXT, '@graph': graph };
+}
+
 export function getPageEntry(pathname: string): PageSchemaEntry | null {
    return PAGE_SCHEMA[normalize(pathname)] ?? null;
 }

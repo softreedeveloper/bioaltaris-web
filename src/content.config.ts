@@ -17,6 +17,9 @@ const conocimiento = defineCollection({
       seoTitulo: z.string().max(60).optional(),
       seoDescripcion: z.string().max(160).optional(),
       fecha: z.coerce.date(),
+      // Última revisión de contenido. Alimenta dateModified y el lastmod del
+      // sitemap; sin ella se usa `fecha`.
+      actualizado: z.coerce.date().optional(),
       // Origen del contenido: publicación, agencia, revista…
       fuente: z.string().optional(),
       categorias: z.array(z.string()).default([]),

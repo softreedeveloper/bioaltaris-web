@@ -6,7 +6,7 @@ import '@styles/global.css';
 import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 
 import { getSiteConfig, generateSEOTags } from '@utils/config';
-import { getPageEntry, getPageSchema } from '@utils/schema';
+import { buildGraph, getPageEntry, getPageSchema } from '@utils/schema';
 
 import ConsentMode from '@components/analytics/ConsentMode.astro';
 import GoogleTagManager from '@components/analytics/GoogleTagManager.astro';
@@ -58,7 +58,9 @@ const seoTags = generateSEOTags(
 const fontFace = `@font-face{font-family:'Inter Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${interWoff2}) format('woff2-variations')}`;
 
 const pageSchema = schema ?? getPageSchema(Astro.url.pathname, Astro.request);
-const schemaJson = JSON.stringify(Array.isArray(pageSchema) ? pageSchema : [pageSchema]);
+const schemaJson = JSON.stringify(
+   buildGraph(Array.isArray(pageSchema) ? pageSchema : [pageSchema], Astro.request),
+);
 
 // `?minimal=1` apaga GTM, GA4 y el Pixel de golpe. Sirve para aislar el coste
 // de los scripts de terceros al medir rendimiento sin tocar el código.

@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ request }) => {
          path: `/conocimiento/${a.id}`,
          changefreq: 'monthly',
          priority: '0.6',
-         lastmod: a.data.fecha.toISOString().split('T')[0],
+         lastmod: (a.data.actualizado ?? a.data.fecha).toISOString().split('T')[0],
       })),
    ];
 
