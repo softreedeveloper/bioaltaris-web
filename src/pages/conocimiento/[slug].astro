@@ -14,6 +14,13 @@ const { Content } = await render(entrada);
 const { titulo, resumen, fecha, actualizado, fuente, categorias, seoTitulo, seoDescripcion } = entrada.data;
 
 const path = `/conocimiento/${entrada.id}`;
+
+// Imagen OG propia si ya se generó (scripts/brand/generar-og.mjs); un artículo
+// recién publicado sin ella usa la genérica en vez de apuntar a un 404.
+const ogGeneradas = Object.keys(import.meta.glob('/public/og/conocimiento/*.jpg'));
+const ogImagen = ogGeneradas.includes(`/public/og/conocimiento/${entrada.id}.jpg`)
+   ? `/og/conocimiento/${entrada.id}.jpg`
+   : undefined;
 const fechaISO = fecha.toISOString();
 const actualizadoISO = actualizado?.toISOString();
 const fechaLegible = fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -26,6 +33,7 @@ const schema = [
          path,
          publishedTime: fechaISO,
          modifiedTime: actualizadoISO,
+         image: ogImagen,
          tags: categorias,
       },
       Astro.request,
@@ -43,6 +51,7 @@ const schema = [
 <BaseLayout
    title={tituloConMarca(seoTitulo ?? titulo, 'BioAltaris')}
    description={seoDescripcion ?? recortar(resumen, 160)}
+   image={ogImagen}
    type="article"
    publishedTime={fechaISO}
    modifiedTime={actualizadoISO}

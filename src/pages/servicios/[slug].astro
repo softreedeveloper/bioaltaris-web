@@ -23,6 +23,8 @@ const seoDescription = unirFrases(
    ],
    160,
 );
+// Imagen OG por etapa (scripts/brand/generar-og.mjs).
+const ogImagen = `/og/servicios/${categoria.id}.jpg`;
 const relacionados = serviciosPorCategoria(servicio.categoria).filter((s) => s.slug !== servicio.slug);
 const acento = servicio.acento === 'azul' ? 'text-accent2' : 'text-accent';
 
@@ -38,7 +40,7 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} type="website" schema={schema}>
+<BaseLayout title={seoTitle} description={seoDescription} image={ogImagen} type="website" schema={schema}>
    <article>
       <header class="container-site pb-10 pt-10 lg:pt-14">
          <Breadcrumbs items={[{ name: 'Servicios', href: '/servicios' }, { name: servicio.titulo }]} />

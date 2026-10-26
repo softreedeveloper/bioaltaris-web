@@ -8,6 +8,22 @@ import '@styles/global.css';
 import Isotipo from '@components/layout/Isotipo.astro';
 
 if (!import.meta.env.DEV) return new Response(null, { status: 404 });
+
+// Variante por página: `?etiqueta=…&titulo=…&lema=…` pinta la marca pequeña
+// arriba y el título grande. Sin parámetros sale la imagen genérica del sitio.
+// La genera scripts/brand/generar-og.mjs para cada etapa y cada artículo.
+const params = Astro.url.searchParams;
+const titulo = params.get('titulo');
+const etiqueta = params.get('etiqueta') ?? '';
+const lema = params.get('lema') ?? '';
+// El título largo baja de cuerpo para no pasar de tres líneas.
+const cuerpoTitulo = !titulo
+   ? ''
+   : titulo.length > 70
+     ? 'text-[52px]'
+     : titulo.length > 40
+       ? 'text-[60px]'
+       : 'text-[72px]';
 ---
 
 <!doctype html>
@@ -47,18 +63,39 @@ if (!import.meta.env.DEV) return new Response(null, { status: 404 });
             radial-gradient(600px 500px at 10% 100%, rgb(47 214 153 / 0.14), transparent 60%);"
       >
       </div>
-      <div class="relative flex items-center gap-14 px-24">
-         <Isotipo class="h-56 w-56 shrink-0" />
-         <div class="flex flex-col">
-            <span class="text-[44px] font-medium leading-none">bio</span>
-            <span class="-mt-2 text-[128px] font-semibold leading-none tracking-tight text-accent">altaris</span>
-            <span class="mt-5 text-[22px] font-medium uppercase tracking-[0.3em] text-muted">
-               Consultoría biofarmacéutica
-            </span>
-            <span class="mt-8 text-[24px] leading-snug text-muted">
-               Del laboratorio al expediente regulatorio · México
-            </span>
-         </div>
-      </div>
+      {
+         titulo ? (
+            <div class="relative flex h-full w-full flex-col justify-between px-24 py-20">
+               <div class="flex items-center gap-5">
+                  <Isotipo class="h-16 w-16 shrink-0" />
+                  <div class="flex flex-col leading-none">
+                     <span class="text-[18px] font-medium">bio</span>
+                     <span class="-mt-0.5 text-[40px] font-semibold tracking-tight text-accent">altaris</span>
+                  </div>
+               </div>
+               <div class="flex max-w-[980px] flex-col">
+                  {etiqueta && (
+                     <span class="text-[20px] font-semibold uppercase tracking-[0.3em] text-accent">{etiqueta}</span>
+                  )}
+                  <span class:list={['mt-5 font-semibold leading-[1.08] tracking-tight', cuerpoTitulo]}>{titulo}</span>
+                  {lema && <span class="mt-6 text-[26px] leading-snug text-muted">{lema}</span>}
+               </div>
+            </div>
+         ) : (
+            <div class="relative flex items-center gap-14 px-24">
+               <Isotipo class="h-56 w-56 shrink-0" />
+               <div class="flex flex-col">
+                  <span class="text-[44px] font-medium leading-none">bio</span>
+                  <span class="-mt-2 text-[128px] font-semibold leading-none tracking-tight text-accent">altaris</span>
+                  <span class="mt-5 text-[22px] font-medium uppercase tracking-[0.3em] text-muted">
+                     Consultoría biofarmacéutica
+                  </span>
+                  <span class="mt-8 text-[24px] leading-snug text-muted">
+                     Del laboratorio al expediente regulatorio · México
+                  </span>
+               </div>
+            </div>
+         )
+      }
    </body>
 </html>
