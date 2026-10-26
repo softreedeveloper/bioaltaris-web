@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getSiteConfig } from '@utils/config';
+import { GA4_ID, GTM_ID, META_PIXEL_ID } from '@utils/tracking-ids';
 
 /**
  * Diagnóstico de despliegue: en qué entorno se resolvió esta respuesta y qué
@@ -27,9 +28,9 @@ export const GET: APIRoute = ({ request }) => {
       `noIndex         : ${cfg.noIndex}`,
       `robots          : ${cfg.robotsContent}`,
       '',
-      `GTM   configurado: ${Boolean(import.meta.env.PUBLIC_GTM_ID)}`,
-      `GA4   configurado: ${Boolean(import.meta.env.PUBLIC_GA4_ID)}`,
-      `Pixel configurado: ${Boolean(import.meta.env.PUBLIC_META_PIXEL_ID)}`,
+      `GTM   configurado: ${Boolean(GTM_ID)}`,
+      `GA4   configurado: ${Boolean(GA4_ID)}`,
+      `Pixel configurado: ${Boolean(META_PIXEL_ID)}`,
       `n8n   configurado: ${Boolean(import.meta.env.N8N_WEBHOOK_URL)}`,
    ].join('\n');
 
