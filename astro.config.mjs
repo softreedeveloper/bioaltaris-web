@@ -24,6 +24,14 @@ export default defineConfig({
    // es src/styles/global.css, importado desde BaseLayout.astro.
    integrations: [tailwind({ applyBaseStyles: false })],
 
+   // Artículos retirados de Conocimiento → listado (301), para no dejar 404
+   // en URLs que ya pudieron indexarse o compartirse.
+   redirects: {
+      '/conocimiento/cofepris-alianza-ops-oms-ue': { status: 301, destination: '/conocimiento' },
+      '/conocimiento/fda-elimina-rems-car-t': { status: 301, destination: '/conocimiento' },
+      '/conocimiento/sindrome-liberacion-citocinas-revision': { status: 301, destination: '/conocimiento' },
+   },
+
    markdown: {
       rehypePlugins: [enlacesExternosNuevaPestana],
    },
