@@ -2,11 +2,31 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import netlify from '@astrojs/netlify';
 
+/**
+ * Enlaces externos del Markdown (fuentes de los artículos de conocimiento) en
+ * otra pestaña. Sin dependencia: recorre el árbol hast y marca los <a> cuyo
+ * href es http(s).
+ */
+function enlacesExternosNuevaPestana() {
+   const visitar = (nodo) => {
+      if (nodo.type === 'element' && nodo.tagName === 'a' && /^https?:\/\//.test(String(nodo.properties?.href ?? ''))) {
+         nodo.properties.target = '_blank';
+         nodo.properties.rel = ['noopener', 'noreferrer'];
+      }
+      nodo.children?.forEach(visitar);
+   };
+   return (arbol) => visitar(arbol);
+}
+
 export default defineConfig({
    // applyBaseStyles: false — la integración inyectaría su propia hoja con las
    // directivas @tailwind en cada página. El único punto de entrada de Tailwind
    // es src/styles/global.css, importado desde BaseLayout.astro.
    integrations: [tailwind({ applyBaseStyles: false })],
+
+   markdown: {
+      rehypePlugins: [enlacesExternosNuevaPestana],
+   },
 
    vite: {
       resolve: {
